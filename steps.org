@@ -10,7 +10,7 @@
       Zotero later)
     - Rename appropriately
     - Change entry in the bibtex file
-  - [ ] Add the tags, notes, data added, and folder fields to bibtex
+  - [ ] Add the tags, notes, date added, and folder fields to bibtex
     - ??
   - [ ] Create a JabRef like group structure from the folder fields
     
