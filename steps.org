@@ -12,13 +12,18 @@
     - Change entry in the bibtex file
   - [ ] Add the tags, notes, date added, and folder fields to bibtex
     - ??
+    - query db
+    - import into R, with care for date
+    - add fields to bibtex
   - [ ] Create a JabRef like group structure from the folder fields
     
-
+** Issues:
+   - [ ] will the datestamp be imported into Zotero from bibtex?
 
 ** Why not do all manipulating the sqlite?
    - Bcause the bibtex route I understand better, and Mendeley generates
      more or less OK bibtex.
+
 
 
 

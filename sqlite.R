@@ -36,54 +36,22 @@ dbListFields(con, "Documents")
 ## dbClearResult(res)
 ## dbDisconnect(con)
 
-
 dd <- dbReadTable(con, "Documents")
 
-
-res <- dbSendQuery(con, "select  cast(t as real) from data")
-
-t <- as.numeric(dbFetch(res))
-
-
-as.POSIXct("1970-01-01 00:00:00", tz="UTC") + t/1000
-dbClearResult(res)
-dbDisconnect(con)
-
-
-
-res <- dbGetQuery(con, 'SELECT * FROM Documents LIMIT 5')
+res7 <- dbGetQuery(con, "
+SELECT
+Documents.id AS Ref_id,
+cast(Documents.added as real) AS Ref_added,
+DocumentNotes.text AS Ref_notes
+FROM
+Documents
+LEFT OUTER JOIN DocumentNotes ON Documents.id = DocumentNotes.documentId 
+")
+dim(res7); names(res7)
 
 
-max.date <- max(dd$added)
-min.date <- min(dd$added)
+as.character(format(round(as.POSIXct("1970-01-01", tz="GMT+2") + res7$Ref_added/1000,  "secs")))[1]
 
-ad <- dd$added
-mo <- dd$modified
-mo[is.na(mo)] <- 0 ## ??
-
-as.POSIXct(min.date + max.date, origin = "1970-01-01", tz = "GMT")
-
-## last time a change? And this matches, kind of
-as.POSIXct(min(dbReadTable(con, "EventLog")$timestamp), origin = "1970-01-01",
-           tz = "GMT+2")
-
-last.change <- min(dbReadTable(con, "EventLog")$timestamp)
-last.change.posix <- as.POSIXct(last.change, origin = "1970-01-01",
-                          tz = "GMT+2")
-
-myDate <- function(x, min = min.date, last = last.change) {
-    as.POSIXct(x + min + last, origin = "1970-01-01",
-               tz = "GMT+2")
-}
-
-
-## I am unable to figure it out. So I use one I know, which is the first
-## entry ever:
-d1 <- min(dd$added)
-o1 <- "2010-07-22"
-myDate2 <- function(x, base = d1, origin = o1) {
-    as.POSIXct(x + base, origin = origin,  tz = "GMT+2")
-}
 
 
 
