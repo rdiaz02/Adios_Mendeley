@@ -1,0 +1,24 @@
+* Steps
+  - [ ] Fix the entries with broken links to PDFs
+    - use list of changes in 20/06 from seafile
+  - [ ] Generate bibtex from mendeley
+  - [ ] Import it into JabRef to check duplicated keys or use sed and uniq.
+  - [ ] Fix those in Mendeley
+  - [ ] Export bibtex from Mendeley again
+  - [ ] Rename all pdfs and other files with long names
+    - find long file names (not dir names, as those will be fixed by
+      Zotero later)
+    - Rename appropriately
+    - Change entry in the bibtex file
+  - [ ] Add the tags, notes, data added, and folder fields to bibtex
+    - ??
+  - [ ] Create a JabRef like group structure from the folder fields
+    
+
+
+** Why not do all manipulating the sqlite?
+   - Bcause the bibtex route I understand better, and Mendeley generates
+     more or less OK bibtex.
+
+
+
