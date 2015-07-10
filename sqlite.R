@@ -1,6 +1,15 @@
 library(RSQLite)
+library(RefManageR)
 
-con <- dbConnect(SQLite(), "mend.sqlite")
+## library(bibtex)
+
+MendeleySQL <- "mend.sqlite"
+BibTeXFile <- "library.bib"
+
+## bibfile <- read.bib(file = BibTeXFile) ## Nope: ignores incomplete entries
+## bibfile <- ReadBib(file = BibTeXFile, check = FALSE): Drops fields I care about
+bibfile <- readLines(con = BibTeXFile, check = FALSE)
+con <- dbConnect(SQLite(), MendeleySQL)
 dbListTables(con)
 
 ## All the tables
@@ -121,15 +130,6 @@ while(changesDepth) {
 
 ## We need to output each folder and its children immediately below
 
-## first, sort by depth
-
-## until stable thing
-##    for each with depth >= 2
-##      start with depth == 2
-##      locate its parent position: pi
-##      place that element at pi + 1
-##      shift index of all elements under pi by 1
-
 folderNames <- folderNames[order(folderNames$depth), ]
 originalFolderNames <- folderNames ## just in case
 
@@ -194,8 +194,53 @@ write(file = "jabref-groups.txt",
 
 
 
+## to do still:
+
+## rename long file names
+## add info to bibtex
+## check bibtex errors/warnings
 
 
+bibtex0 <- readLines(con = "mini.bib")
+
+getBibKey <- function(x) {
+    strsplit(strsplit(x, "{",
+                      fixed = TRUE)[[1]][2], ",", fixed = TRUE)[[1]][1]
+    ## do something
+}
+
+myBibtexReader <- function(x) {
+    startEntry <- "^@"
+    endEntry <- "^}$"
+    starts <- grep(startEntry, x)
+    ends <- grep(endEntry, x)
+    if(length(starts) != length(ends))
+        stop("length of starts and ends differ")
+    if(!all(starts < ends))
+        stop("starts !< ends")
+    out <- vector(mode = "list", length = length(starts))
+    names <- vector(mode = "character", length = length(starts))
+    for(i in seq.int(length(starts))) {
+        out[[i]] <- x[starts[i]:ends[i]]
+        names[i] <- getBibKey(x[starts[i]])
+    }
+    names(out) <- names
+    return(out)
+}
+
+
+bibfile <- myBibtexReader(bibtex0)
+
+
+bibtex2 <- readLines(con = "library.bib")
+
+bibfile2 <- myBibtexReader(bibtex2)
+
+## why do I have NAs in bibtex keys? Because many things are not exported
+## to bibtex! Any that do not have keys!!!
+
+## FIXME: check num rows in dd and length bibfile are the same!
+## add mendeley id to bibtex too
 
 
 
