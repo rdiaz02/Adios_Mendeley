@@ -164,16 +164,16 @@ eachFolder <- function(x, folderInfo = folderDocuments,
                        fullDoc = AllDocInfo) {
     ## This works by line, not id!!
     ## To be used with apply/lapply, etc
-    first <- paste(x$depth, " ExplicitGroup:",  x$name,  sep = "\\;0\\;")
+    first <- paste0(x$depth, " ExplicitGroup:",  x$name, "\\;0\\;")
     refs <- paste(getBibtexRefsGroup(x$id, folderInfo, fullDoc),
                   collapse = "\\;")
-    return(paste0(first, refs, ";"))
+    return(paste0(first, refs, ";;"))
 }
 
 
 outFolders <- function(folders, folderInfo, fullDoc) {
-    head <- "\n@comment{jabref-meta: groupsversion:3;}\n\n
-@comment{jabref-meta: groupstree:\n0 AllEntriesGroup:;"
+    head <- "\n@comment{jabref-meta: groupsversion:3;}\n
+@comment{jabref-meta: groupstree:\n0 AllEntriesGroup:;\n"
     lout <- vector(mode = "list", nrow(folders))
     ## lout <- lapply()
      for(ff in seq.int(nrow(folders))) {
@@ -181,18 +181,15 @@ outFolders <- function(folders, folderInfo, fullDoc) {
                                 folderInfo,
                                 fullDoc)
      }
-    return(paste(head,
+    lout <- paste(lout, collapse = "\n")
+    return(paste0(head,
                  lout,
-                 "}"))
+                 "\n}"))
 }
 
 
-outFolders(folderNames, folderDocuments, res)
-## 
-
-## Output will be:
-
-## digit of level
+write(file = "jabref-groups.txt",
+      outFolders(folderNames, folderDocuments, res))
 
 
 
@@ -263,24 +260,24 @@ sapply(tables, function(x) dbListFields(con, x))
 
 
 
-resPdf <- dbGetQuery(con, "
-SELECT FileNotes.documentId, group_concat(FileNotes.note, ' \n ')
-FROM FileNotes
-GROUP BY FileNotes.documentId
-")
+## resPdf <- dbGetQuery(con, "
+## SELECT FileNotes.documentId, group_concat(FileNotes.note, ' \n ')
+## FROM FileNotes
+## GROUP BY FileNotes.documentId
+## ")
 
 
 
-res <- dbGetQuery(con, "
-SELECT
-Documents.id AS Ref_id,
-Documents.citationKey AS Ref_BibtexKey,
-cast(Documents.added as real) AS Ref_added,
-DocumentNotes.text AS Ref_notes,
-(SELECT group_concat(FileNotes.note, ' \n ')
- FROM FileNotes GROUP BY FileNotes.documentId
- ) AS Ref_PDFnotes
-FROM
-Documents
-LEFT OUTER JOIN DocumentNotes ON Documents.id = DocumentNotes.documentId
-LEFT OUTER JOIN FileNotes ON Documents.id = FileNotes.documentId")
+## res <- dbGetQuery(con, "
+## SELECT
+## Documents.id AS Ref_id,
+## Documents.citationKey AS Ref_BibtexKey,
+## cast(Documents.added as real) AS Ref_added,
+## DocumentNotes.text AS Ref_notes,
+## (SELECT group_concat(FileNotes.note, ' \n ')
+##  FROM FileNotes GROUP BY FileNotes.documentId
+##  ) AS Ref_PDFnotes
+## FROM
+## Documents
+## LEFT OUTER JOIN DocumentNotes ON Documents.id = DocumentNotes.documentId
+## LEFT OUTER JOIN FileNotes ON Documents.id = FileNotes.documentId")
