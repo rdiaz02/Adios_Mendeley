@@ -9,86 +9,79 @@ sapply(tables, function(x) dbListFields(con, x))
 
 
 
+## Documents: date added, notes, and bibtexkey.
+## Mendeley should export the notes in the "annote" filed but it doesn't
+## always, specially if you have newlines. It is a known bug.
 
+## For the cast thing, see: https://github.com/rstats-db/RSQLite/issues/65
+## The date is in milliseconds since 1970, and that is > 2^31, which is
+## largest R integer. SImilar to
+## http://stackoverflow.com/questions/24688682/importing-sqlite-integer-column-which-is-231-1
+## So I take some code for the cast and the idea of dividing and adding
+## from the issue in github.
 
-## Do i need tasg? notes?
-## tags in DocumentTags?
+## Note that keywords are the same as mendeley-tags in bibtex
 
-## Notes in the PDF
-dbReadTable(con, "FileNotes")[1:10, ] ## notes
-## fields note and baseNote are identical
-
-
-## Notes in the entry itself
-cucu <- dbReadTable(con, "DocumentNotes")
-## use the text field
-
-## I need date added
-
-dbListFields(con, "Documents")
-## yes, it is the added field, but R seems to screw up reading it or something
-## see similar issue here http://stackoverflow.com/questions/24688682/importing-sqlite-integer-column-which-is-231-1
-## https://github.com/rstats-db/RSQLite/issues/65
-### Note workaround
-## library(RSQLite)
-## drv <- dbDriver("SQLite")
-## con <- dbConnect(drv, dbname="test.db")
-## res <- dbSendQuery(con, "select cast(t as real) from data")
-## t <- as.numeric(dbFetch(res))
-## as.POSIXct("1970-01-01 00:00:00", tz="UTC") + t/1000
-## dbClearResult(res)
-## dbDisconnect(con)
-
+## some initial checks:
 dd <- dbReadTable(con, "Documents")
+nE <- nrow(dd)
+if(length(unique(dd$id)) != nE)
+    stop("Eh? multiple entries for same document?")
 
-res7 <- dbGetQuery(con, "
+if(length(unique(dd$citationKey)) != nE) {
+    warning("Repeated bibtex entries")
+    which(duplicated(dd$citationKey))
+}
+
+if(any(is.na(dd$citationKey))) {
+    warning("NA in bibtex entries")
+    which(is.na(dd$citationKey))
+}
+
+
+dn <-  dbReadTable(con, "DocumentNotes")
+nE <- nrow(dn)
+if(length(unique(dn$documentId)) != nE)
+    stop("Eh? multiple entries for same document in notes?")
+
+
+res <- dbGetQuery(con, "
 SELECT
 Documents.id AS Ref_id,
+Documents.citationKey AS Ref_BibtexKey,
 cast(Documents.added as real) AS Ref_added,
-DocumentNotes.text AS Ref_notes
-FROM
-Documents
-LEFT OUTER JOIN DocumentNotes ON Documents.id = DocumentNotes.documentId 
-")
-dim(res7); names(res7)
+DocumentNotes.text AS Ref_notes,
+GROUP_CONCAT(FileNotes.note) AS Ref_PDFNotes
+FROM Documents
+LEFT OUTER JOIN FileNotes on FileNotes.documentId = Documents.id
+LEFT OUTER JOIN DocumentNotes ON Documents.id = DocumentNotes.documentId
+GROUP BY Documents.id"
+                  )
+res$timestamp <- as.character(format(round(as.POSIXct("1970-01-01",
+                                                       tz="GMT+2") +
+                                                           res$Ref_added/1000,
+                                            "secs")))
 
-
-as.character(format(round(as.POSIXct("1970-01-01", tz="GMT+2") + res7$Ref_added/1000,  "secs")))[1]
-
-
-
-
-## The added field is weird because it it has a non-monotonic
-## correspondence to the date of addition of a document. I know because
-## largest and smallest values are not those from the first and last
-## documents added.
-
-
-## DocumentCanonicalIds has some date info, but not clear to me what.
-
-## all the tables
-tables <- dbListTables(con)
-sapply(tables, function(x) dbListFields(con, x))
-
-
-## - exporting from Mendeley the folders
-##     - It is in the DocumentFolders and DocumentFoldersBase (for names)
-
-
-
-## check the two books for hpbbm
-
-
-
-
+## some extra checks
+if(nrow(res) != length(unique(res$Ref_id)))
+    stop("repeated Ref_Id")
+if(length(unique(res$Ref_PDFNotes)) == 1)
+    steop("unique PDFnotes")
+if(length(unique(res$Ref_notes)) == 1)
+    steop("unique notes")
+if(length(unique(res$timestamp)) == 1)
+    steop("unique timestamp")
+if(length(unique(res$Ref_BibtexKey)) == 1)
+    steop("unique bibtex key")
 
 
 
 ## Folders in Mendeley, collections in Zotero, groups in JabRef
 ## This is what they look like
-dbReadTable(con, "DocumentFolders")[1:10, ]
-dbReadTable(con, "DocumentFoldersBase")[1:10, ]
-dbReadTable(con, "Folders")[1:10, ] ## folder names
+## dbReadTable(con, "DocumentFolders")[1:10, ]
+## dbReadTable(con, "DocumentFoldersBase")[1:10, ]
+## dbReadTable(con, "Folders")[1:10, ] ## folder names
+
 ## Unclear what the difference is between DocumentFolders and
 ## DocumentFoldersBase. We use both, and then unique
 
@@ -138,7 +131,6 @@ while(changesDepth) {
 ##      shift index of all elements under pi by 1
 
 folderNames <- folderNames[order(folderNames$depth), ]
-
 originalFolderNames <- folderNames ## just in case
 
 folderNames <- originalFolderNames
@@ -159,36 +151,44 @@ for(i in maybe.move) {
 }
 
 getBibTex <- function(docId, fullDoc) {
-    fullDoc[fullDoc$Ref_id == docId, "Ref_Bibtex"]
+    fullDoc[fullDoc$Ref_id == docId, "Ref_BibtexKey"]
 }
 
 getBibtexRefsGroup <- function (folderId, folderInfo, fullDoc) {
-    refIds <- folderInfo[[folderId]]
-    return(vapply(refIds, function(x) getBibTex(x, fullDoc)))
+    refIds <- folderInfo[[as.character(folderId)]]
+    return(vapply(refIds, function(x) getBibTex(x, fullDoc), "a"))
 }
+
 
 eachFolder <- function(x, folderInfo = folderDocuments,
                        fullDoc = AllDocInfo) {
     ## This works by line, not id!!
     ## To be used with apply/lapply, etc
-    first <- paste0(x$depth, " ExplicitGroup:",
-                x$name, "\;0\;")
-    refs <- getBibtexRefsGroup(x$id, folderInfo, fullDoc)
+    first <- paste(x$depth, " ExplicitGroup:",  x$name,  sep = "\\;0\\;")
+    refs <- paste(getBibtexRefsGroup(x$id, folderInfo, fullDoc),
+                  collapse = "\\;")
     return(paste0(first, refs, ";"))
 }
 
 
-outFolders <- function(folders) {
+outFolders <- function(folders, folderInfo, fullDoc) {
     head <- "\n@comment{jabref-meta: groupsversion:3;}\n\n
 @comment{jabref-meta: groupstree:\n0 AllEntriesGroup:;"
     lout <- vector(mode = "list", nrow(folders))
     ## lout <- lapply()
      for(ff in seq.int(nrow(folders))) {
-         lout[ff] <- eachFolder(folder)
-         a <- folders[ff, ]
+         lout[ff] <- eachFolder(folders[ff, ],
+                                folderInfo,
+                                fullDoc)
      }
+    return(paste(head,
+                 lout,
+                 "}"))
 }
 
+
+outFolders(folderNames, folderDocuments, res)
+## 
 
 ## Output will be:
 
@@ -200,3 +200,87 @@ outFolders <- function(folders) {
 
 
 
+
+
+
+
+
+
+## Miscell stuff
+## Notes in the PDF
+dbReadTable(con, "FileNotes")[1:10, ] ## notes fields note and baseNote
+## are identical But those I already have in the PDF. Since easy and
+## cheap, make sure I have all.
+
+## Notes in the entry itself
+cucu <- dbReadTable(con, "DocumentNotes")
+## use the text field
+
+## I need date added
+
+dbListFields(con, "Documents")
+
+
+
+
+dd <- dbReadTable(con, "Documents")
+
+res7 <- dbGetQuery(con, "
+SELECT
+Documents.id AS Ref_id,
+Documents.citationKey AS Ref_BibtexKey,
+cast(Documents.added as real) AS Ref_added,
+DocumentNotes.text AS Ref_notes
+FROM
+Documents
+LEFT OUTER JOIN DocumentNotes ON Documents.id = DocumentNotes.documentId 
+")
+res7$timestamp <- as.character(format(round(as.POSIXct("1970-01-01",
+                                                       tz="GMT+2") +
+                                                           res7$Ref_added/1000,
+                                            "secs")))
+dim(res7); names(res7)
+
+
+as.character(format(round(as.POSIXct("1970-01-01", tz="GMT+2") + res7$Ref_added/1000,  "secs")))[1]
+
+
+
+
+
+## all the tables
+tables <- dbListTables(con)
+sapply(tables, function(x) dbListFields(con, x))
+
+
+## - exporting from Mendeley the folders
+##     - It is in the DocumentFolders and DocumentFoldersBase (for names)
+
+
+
+## check the two books for hpbbm
+
+
+
+
+resPdf <- dbGetQuery(con, "
+SELECT FileNotes.documentId, group_concat(FileNotes.note, ' \n ')
+FROM FileNotes
+GROUP BY FileNotes.documentId
+")
+
+
+
+res <- dbGetQuery(con, "
+SELECT
+Documents.id AS Ref_id,
+Documents.citationKey AS Ref_BibtexKey,
+cast(Documents.added as real) AS Ref_added,
+DocumentNotes.text AS Ref_notes,
+(SELECT group_concat(FileNotes.note, ' \n ')
+ FROM FileNotes GROUP BY FileNotes.documentId
+ ) AS Ref_PDFnotes
+FROM
+Documents
+LEFT OUTER JOIN DocumentNotes ON Documents.id = DocumentNotes.documentId
+LEFT OUTER JOIN FileNotes ON Documents.id = FileNotes.documentId")
