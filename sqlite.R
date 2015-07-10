@@ -3,12 +3,55 @@ library(RSQLite)
 con <- dbConnect(SQLite(), "mend.sqlite")
 dbListTables(con)
 
-## Folders
+## Folders in Mendeley, collections in Zotero, groups in JabRef
+## This is what they look like
 dbReadTable(con, "DocumentFolders")[1:10, ]
 dbReadTable(con, "DocumentFoldersBase")[1:10, ]
 dbReadTable(con, "Folders")[1:10, ] ## folder names
+## Unclear what the difference is between DocumentFolders and
+## DocumentFoldersBase. We use both, and then unique
 
-## Do i need tgas? notes?
+df1 <- dbReadTable(con, "DocumentFolders")[, -3] ## remove "status" column
+df2 <- dbReadTable(con, "DocumentFoldersBase")
+folders <- rbind(df1, df2)
+## Then use bibtex key and folder name.
+folderDocuments <- by(folders, folders$folderId,
+                      function(x) {unique(x$documentId)})
+
+folderNames <- dbReadTable(con, "Folders")[, c(1, 3, 4)]
+## parentId takes 0, -1, and then values that match those of other folder
+## ids. No idea what is the differences between 0 and -1.
+
+## There are probably better ways, but this works.  Actually, this should
+## work with arbitrarily deep nesting. Not what follows below.
+folderNames$depth <- 0
+folderNames$depth[folderNames$parentId %in% c(0, -1) ] <- 1
+depthFolder <- function(id, df = folderNames) {
+    ## In terms of id, because easier for error checking.
+    pos <- which(df$id == id)
+    parentId <- df[pos, "parentId"]
+    if(parentId %in% c(0, -1) ) return(1)
+    else {
+        posParent <- which(df$id == parentId)
+        return(df[posParent, "depth"] + 1)
+    }
+}
+changesDepth <- TRUE
+while(changesDepth) {
+    formerDepth <- folderNames$depth
+    folderNames$depth <- sapply(folderNames$id, depthFolder)
+    if(all(formerDepth == folderNames$depth))
+        changesDepth <- FALSE
+}
+
+## Output will be:
+
+## digit of level
+
+
+
+
+## Do i need tasg? notes?
 ## tags in DocumentTags?
 
 ## Notes in the PDF
