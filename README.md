@@ -1,5 +1,11 @@
 
 
+Why move:
+- Does not check for duplicated bibtex citation keys and will not generate
+  bibtex entry if you do not have author, date entries. This sucks, as for
+  me the place I look for stuff is the bibtex file (much faster searching).
+
+
 Why through Bibtex:
 - Because you can incorporate loads of additional information, including
   the Mendely folders the tags, etc.
@@ -16,3 +22,12 @@ Several pieces:
   produce output in a format compatible with JabRef, because the Zoter
   importer of bibtex files understands JabRef's groups [zz](zz).
   https://github.com/ZotPlus/zotero-better-bibtex/issues/97
+
+
+
+Notes and warnings
+==================
+
+- Collections/folders: tried it only with two levels. Should work with
+  more convoluted ones, since algorithms are fairly simple, but I have not
+  checked it.
