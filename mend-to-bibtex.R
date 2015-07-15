@@ -1,132 +1,54 @@
-
 MendeleySQL <- "mend.sqlite"
 BibTeXFile <- "library.bib"
 
 
 
-## library(RefManageR)
-## library(bibtex)
 
 
 
-## bibfile <- read.bib(file = BibTeXFile) ## Nope: ignores incomplete entries
-## bibfile <- ReadBib(file = BibTeXFile, check = FALSE): Drops fields I care about
-
-
-
-source("sqlite-functions.R")
-source("bibtex-functions.R")
-
-bibfile <- myBibtexReader(BibTeXFile)
-
-res <- dbGetQuery(con, sqliteQuery1) 
-
+source("sqlite-bibtex-functions.R")
 
 
 con <- dbConnect(SQLite(), MendeleySQL)
-dbListTables(con)
-
-## All the tables
-tables <- dbListTables(con)
-sapply(tables, function(x) dbListFields(con, x))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## Documents: date added, notes, and bibtexkey.
-## Mendeley should export the notes in the "annote" filed but it doesn't
-## always, specially if you have newlines. It is a known bug.
-
-## For the cast thing, see: https://github.com/rstats-db/RSQLite/issues/65
-## The date is in milliseconds since 1970, and that is > 2^31, which is
-## largest R integer. SImilar to
-## http://stackoverflow.com/questions/24688682/importing-sqlite-integer-column-which-is-231-1
-## So I take some code for the cast and the idea of dividing and adding
-## from the issue in github.
-
-## Note that keywords are the same as mendeley-tags in bibtex
-
-## ## some initial checks:
-## dd <- dbReadTable(con, "Documents")
-## nE <- nrow(dd)
-## if(length(unique(dd$id)) != nE)
-##     stop("Eh? multiple entries for same document?")
-
-## if(length(unique(dd$citationKey)) != nE) {
-##     warning("Repeated bibtex entries")
-##     which(duplicated(dd$citationKey))
-## }
-
-## if(any(is.na(dd$citationKey))) {
-##     warning("NA in bibtex entries")
-##     which(is.na(dd$citationKey))
-## }
-## dn <-  dbReadTable(con, "DocumentNotes")
-## nE <- nrow(dn)
-## if(length(unique(dn$documentId)) != nE)
-##     stop("Eh? multiple entries for same document in notes?")
-
-
 minimalDBchecks(con)
 
-bibtexDBConsistencyCheck(res, bib) ## to write this
+## Continue if things are ok
+
+
+res <- dbGetQuery(con, sqliteQuery1) 
+res$timestamp <- getTimestamp(res)
+minimalDBDFchecks(res)
+
+
+## FIXME check here for missing latex keys
 
 
 
+bibfile <- myBibtexReader(BibTeXFile)
+
+bibtexDBConsistencyCheck(res, bib) 
 
 
+jabrefGr <- jabrefGroups(con, res)
 
-res$timestamp <- as.character(format(round(as.POSIXct("1970-01-01",
-                                                       tz="GMT+2") +
-                                                           res$Ref_added/1000,
-                                            "secs")))
+## If you want to see what it looks like
+write(file = "jabref-groups.txt",
+      jabrefGr)
 
-## some extra checks
-if(nrow(res) != length(unique(res$Ref_id)))
-    stop("repeated Ref_Id")
-if(length(unique(res$Ref_PDFNotes)) == 1)
-    steop("unique PDFnotes")
-if(length(unique(res$Ref_notes)) == 1)
-    steop("unique notes")
-if(length(unique(res$timestamp)) == 1)
-    steop("unique timestamp")
-if(length(unique(res$Ref_BibtexKey)) == 1)
-    steop("unique bibtex key")
+## FIXME: append the jabrefGr to the rest of the jabref DB
 
 
+## df1 <- dbReadTable(con, "DocumentFolders")[, -3] ## remove "status" column
+## df2 <- dbReadTable(con, "DocumentFoldersBase")
+## folders <- rbind(df1, df2)
 
-## Folders in Mendeley, collections in Zotero, groups in JabRef
-## This is what they look like
-## dbReadTable(con, "DocumentFolders")[1:10, ]
-## dbReadTable(con, "DocumentFoldersBase")[1:10, ]
-## dbReadTable(con, "Folders")[1:10, ] ## folder names
-
-## Unclear what the difference is between DocumentFolders and
-## DocumentFoldersBase. We use both, and then unique
-
-df1 <- dbReadTable(con, "DocumentFolders")[, -3] ## remove "status" column
-df2 <- dbReadTable(con, "DocumentFoldersBase")
-folders <- rbind(df1, df2)
+## folders <- foldersDBread(con)
 ## Then use bibtex key and folder name.
-folderDocuments <- by(folders, folders$folderId,
-                      function(x) {unique(x$documentId)})
+## folderDocuments <- by(folders, folders$folderId,
+##                       function(x) {unique(x$documentId)})
 
-folderNames <- dbReadTable(con, "Folders")[, c(1, 3, 4)]
-## parentId takes 0, -1, and then values that match those of other folder
-## ids. No idea what is the differences between 0 and -1.
+## folderNames <- dbReadTable(con, "Folders")[, c(1, 3, 4)]
 
-## There are probably better ways, but this works.  Actually, this should
-## work with arbitrarily deep nesting. Not what follows below.
 
 
 ## folderNames$depth <- 0
@@ -152,18 +74,9 @@ folderNames <- dbReadTable(con, "Folders")[, c(1, 3, 4)]
 
 
 
-folderNames$depth <- computeFolderDepth(folderNames)
+## folderNames$depth <- computeFolderDepth(folderNames)
+## orderedFolderNames <- orderFolderNames(folderNames)
 
-
-
-
-orderedFolderNames <- orderFolderNames(folderNames)
-
-
-
-
-write(file = "jabref-groups.txt",
-      outFolders(folderNames, folderDocuments, res))
 
 
 
