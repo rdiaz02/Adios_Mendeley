@@ -15,11 +15,11 @@ library(RSQLite)
 
 sqliteQuery1 <- "
 SELECT
-Documents.id AS Ref_id,
+Documents.id AS mendid,
 Documents.citationKey AS Ref_BibtexKey,
 cast(Documents.added as real) AS Ref_added,
-DocumentNotes.text AS Ref_notes,
-GROUP_CONCAT(FileNotes.note) AS Ref_PDFNotes
+DocumentNotes.text AS mendnotes,
+GROUP_CONCAT(FileNotes.note) AS mendpdfnotes
 FROM Documents
 LEFT OUTER JOIN FileNotes on FileNotes.documentId = Documents.id
 LEFT OUTER JOIN DocumentNotes ON Documents.id = DocumentNotes.documentId
@@ -40,13 +40,13 @@ minimalDBchecks <- function(con) {
     if(length(unique(dd$citationKey)) != nE) {
         warning("Repeated bibtex entries")
         cat("\n\nRepeated bibtex entries\n")
-        cat(which(duplicated(dd$citationKey)))
+        print(dd[which(duplicated(dd$citationKey)), "title"])
         cat("\n\n")
     }
     if(any(is.na(dd$citationKey))) {
         warning("NA in bibtex entries")
         cat("\n\nNA in bibtex entries\n")
-        cat(which(is.na(dd$citationKey)))
+        print(dd[which(is.na(dd$citationKey)), "title"])
         cat("\n\n")
     }
     dn <-  dbReadTable(con, "DocumentNotes")
@@ -57,11 +57,11 @@ minimalDBchecks <- function(con) {
 
 minimalDBDFchecks <- function(dbdf) {
     ## some extra checks
-    if(nrow(dbdf) != length(unique(dbdf$Ref_id)))
-        stop("repeated Ref_Id")
-    if(length(unique(dbdf$Ref_PDFNotes)) == 1)
+    if(nrow(dbdf) != length(unique(dbdf$mendid)))
+        stop("repeated Mendeley Id")
+    if(length(unique(dbdf$mendpdfnotes)) == 1)
         stop("unique PDFnotes")
-    if(length(unique(dbdf$Ref_notes)) == 1)
+    if(length(unique(dbdf$mendnotes)) == 1)
         stop("unique notes")
     if(length(unique(dbdf$timestamp)) == 1)
         stop("unique timestamp")
@@ -140,7 +140,7 @@ orderFolderNames <- function(folderNames) {
 }
 
 getBibTex <- function(docId, fullDoc) {
-    fullDoc[fullDoc$Ref_id == docId, "Ref_BibtexKey"]
+    fullDoc[fullDoc$mendid == docId, "Ref_BibtexKey"]
 }
 
 getBibtexRefsGroup <- function (folderId, folderInfo, fullDoc) {
@@ -259,6 +259,43 @@ jabrefGroups <- function(con, res) {
                  lout,
                  "\n}"))
     
+}
+
+
+newBibItems <- function(x) {
+    ## Take a named vector, and return a vector of strings, as new bibtex
+    ## entries.
+    lx <- length(x)
+    out <- vector(mode = "character", length = lx)
+    for(i in seq.int(lx)) {
+        u <- x[i]
+        out[i] <- paste0(names(u), " = ", "{", u, "},")
+    }
+    return(out)
+}
+
+addInfoToBibEntry <- function(x, y) {
+    ## x is the list entry
+    ll <- length(x)
+    if(ll <  3)
+        stop("This entry must be wrong")
+    lastitem <- x[ll]
+    lnew <- y[c("mendid", "timestamp", "mendnotes", "mendpdfnotes")]
+    lnew <- lnew[which(!is.na(lnew))] ## I want the names of the vector
+    ## Simpler if I leave until the end the one before last, because of
+    ## the comma
+    newx <- c(x[1:(ll - 2)],
+              newBibItems(lnew),
+              x[(ll-1, ll)]
+    
+   
+    
+    
+    lnew <- y[c("Ref_id", "timestamp")]
+    names(lnew)[1] <- "Mendeleyid"
+    if(!is.na(y["Ref_notes"])) {
+        lnew <- c(lnew, y["Ref_notes"])
+    }
 }
 
 

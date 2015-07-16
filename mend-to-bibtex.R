@@ -3,9 +3,6 @@ BibTeXFile <- "library.bib"
 
 
 
-
-
-
 source("sqlite-bibtex-functions.R")
 
 
@@ -35,7 +32,12 @@ jabrefGr <- jabrefGroups(con, res)
 write(file = "jabref-groups.txt",
       jabrefGr)
 
+##   add info to bibtex
+## can I add arbitrary info to bibtex
 ## FIXME: append the jabrefGr to the rest of the jabref DB
+## FIXME: rename the long files
+## - fix repeated entries
+## - write the script to clean bibtex for tablet
 
 
 ## df1 <- dbReadTable(con, "DocumentFolders")[, -3] ## remove "status" column
