@@ -1,6 +1,6 @@
 MendeleySQL <- "mend.sqlite"
 BibTeXFile <- "library.bib"
-
+out <- "new-library.bib"
 
 
 source("sqlite-bibtex-functions.R")
@@ -17,24 +17,26 @@ res$timestamp <- getTimestamp(res)
 minimalDBDFchecks(res)
 
 
-## FIXME check here for missing latex keys
-
 
 
 bibfile <- myBibtexReader(BibTeXFile)
-
 bibtexDBConsistencyCheck(res, bib) 
 
+bibfile <- addInfoToBibTex(bibfile, res)
 
 jabrefGr <- jabrefGroups(con, res)
 
 ## If you want to see what it looks like
-write(file = "jabref-groups.txt",
-      jabrefGr)
+## write(file = "jabref-groups.txt",
+##       jabrefGr)
 
-##   add info to bibtex
-## can I add arbitrary info to bibtex
-## FIXME: append the jabrefGr to the rest of the jabref DB
+outFullBibTex(bibfile, jabrefGr, out)
+
+
+
+
+## FIXME check here for missing latex keys
+
 ## FIXME: rename the long files
 ## - fix repeated entries
 ## - write the script to clean bibtex for tablet

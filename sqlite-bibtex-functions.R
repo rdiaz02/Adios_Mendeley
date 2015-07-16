@@ -97,16 +97,18 @@ foldersDBread <- function(con) {
 ## work with arbitrarily deep nesting. 
 
 computeFolderDepth <- function(folderNames) {
-    depth <- 0
+    depth <- rep(0, nrow(folderNames))
     depth[folderNames$parentId %in% c(0, -1) ] <- 1
-    depthFolder <- function(id, df = folderNames) {
+
+    depthFolder <- function(id, prevdepth = depth, df = folderNames) {
         ## In terms of id, because easier for error checking.
         pos <- which(df$id == id)
         parentId <- df[pos, "parentId"]
         if(parentId %in% c(0, -1) ) return(1)
         else {
             posParent <- which(df$id == parentId)
-            return(df[posParent, "depth"] + 1)
+            return(prevdepth[posParent] + 1)
+##            return(df[posParent, "depth"] + 1)
         }
     }
     changesDepth <- TRUE
@@ -235,7 +237,7 @@ getFolderInfo <- function(con) {
 
     return(allFolderInfo = list(
                folderNames = folderNames,
-               folderDocuments = folderDocuments,
+               folderDocuments = folderDocuments
     ))
 }
 
@@ -247,9 +249,9 @@ jabrefGroups <- function(con, res) {
     fi <- getFolderInfo(con)
     head <- "\n@comment{jabref-meta: groupsversion:3;}\n
 @comment{jabref-meta: groupstree:\n0 AllEntriesGroup:;\n"
-    lout <- vector(mode = "list", nrow(fi$folders))
+    lout <- vector(mode = "list", nrow(fi$folderNames))
     ## lout <- lapply()
-     for(ff in seq.int(nrow(folders))) {
+     for(ff in seq.int(nrow(fi$folderNames))) {
          lout[ff] <- eachFolderOut(fi$folderNames[ff, ],
                                    fi$folderDocuments,
                                    res)
@@ -286,17 +288,43 @@ addInfoToBibEntry <- function(x, y) {
     ## the comma
     newx <- c(x[1:(ll - 2)],
               newBibItems(lnew),
-              x[(ll-1, ll)]
-    
-   
-    
-    
-    lnew <- y[c("Ref_id", "timestamp")]
-    names(lnew)[1] <- "Mendeleyid"
-    if(!is.na(y["Ref_notes"])) {
-        lnew <- c(lnew, y["Ref_notes"])
-    }
+              x[c(ll-1, ll)])
+    return(newx)
 }
+
+
+addInfoToBibTex <- function(bib, db) {
+    pm <- match(names(bib), db$Ref_BibtexKey)
+    if(any(is.na(pm)))
+        stop("NAs in the match")
+    if(length(pm) != nrow(db))
+        stop("length match relative to db")
+    if(length(pm) != length(bib))
+        stop("length match relative to bib")
+    if(any(duplicated(pm)))
+        stop("duplicated matches")
+    
+    db <- db[pm, ]
+    
+    ll <- length(bib)
+    for(i in seq.int(ll)) {
+        ll[[i]] <- addInfoToBibEntry(bib[[i]], db[i, ])
+    }
+    return(bib)
+}
+
+
+
+
+outFullBibTex <- function(bib, jabrefgr, outfile) {
+    x1 <- paste(
+        paste(lapply(bib,
+                     function(x) paste(x, collapse = "\n")),
+              collapse = "\n"),
+        jabrefgr, "\n\n")
+    write(file = outfile, x1)
+}
+
 
 
 ## dbListTables(con)
@@ -304,15 +332,6 @@ addInfoToBibEntry <- function(x, y) {
 ## ## All the tables
 ## tables <- dbListTables(con)
 ## sapply(tables, function(x) dbListFields(con, x))
-
-
-
-
-
-
-
-
-
 
 
 
