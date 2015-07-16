@@ -327,12 +327,132 @@ outFullBibTex <- function(bib, jabrefgr, outfile) {
 
 
 
+## Yes, getting them this way a lot simpler than via the "Files" table
+getFilesBib <- function(x) {
+    ## x is each list entry, so a full bibtex entry
+    ## We need to:
+    ##  - get the list of files
+    ##  - really get just the path:
+    ##        - remove the file and {} stuff
+    ##        - remove the :filetype stuff
+    
+    fpos <- grep("^file = \\{", x)
+    ff <- x[fpos]
+    if(length(fpos) == 0)
+        return(list(files = NULL, filepos = fpos))
+    
+    strs.remove <- c("file = {", "},")
+    for(cc in strs.remove)
+        ff <- gsub(cc, "", ff, fixed = TRUE)
+    
+    files <- strsplit(ff, ";")[[1]]
+    files <- vapply(files, function(x) gsub("^:", "/", x), "a")
+    files <- vapply(files, function(x) strsplit(x, ":")[[1]][1], "a")
+    return(list(files = files, filepos = fpos))
+}
+
+
+
+innerCheckDirNesting <- function(x, i,  rootFileDir, num.dirs = 1) {
+    ## Make sure all exactly one directory
+    if(is.null(x))
+        return(TRUE)
+    y <- strsplit(x, rootFileDir)[[1]][2]
+    numd <- length(grep("/", strsplit(y, '')[[1]], value = FALSE)) - 1
+    if(num.dirs != numd) {
+        cat("\n Here, at i = ", i, "\n")
+        cat(y)
+        warning("not expected number of directories. Fix before continuing")
+        return(FALSE)
+    } else {
+        return(TRUE)
+    }
+}
+
+checkFileDirNesting <- function(bib, rootFileDir, numdirs = 1) {
+    ## numdirs is the number of directories between the rootFileDir and
+    ## the file.
+
+    ## Yes, we go through same data several times, but checking this is a
+    ## distinct operation.
+    thefiles <- lapply(bib, function(x) getFilesBib(x)$files)
+    ## yes, loop so as to give the exact place where it fails
+    out <- rep(TRUE, length(thefiles))
+    for(i in seq.int(length(thefiles)))
+        out[i] <- innerCheckDirNesting(thefiles[[i]], i, rootFileDir, numdirs)
+    if(!all(out))
+        stop("checkFileDirNesting failed")
+}
+
+justTheFile <- function(x, rootFileDir) {
+    strsplit(strsplit(x, rootFileDir)[[1]][2], "/")[[1]][3]
+}
+
+newFname <- function(bibtexkey, oldfilename, renamePaths, ranletters = 6) {
+    fsp <- strsplit(oldfilename, "\\.")[[1]]
+    nn <- paste0(bibtexkey, "_",
+                 paste(paste(sample(letters, ranletters,
+                                    replace = TRUE)),
+                       collapse = ""))
+    ## FIXME: the paths
+    nn <- paste0(renamePaths, "/",
+                 paste(paste(sample(letters, 8, replace = TRUE)),
+                       collapse = ""),
+                 "/", nn)
+    if(length(fsp) > 1)
+        return(paste0(nn, ".", fsp[length(fsp)]))
+    else
+        return(nn)
+}
+
+fixFileNames <- function(bibfile, rootFileDir,
+                         renamePaths, ranletters = 6,
+                         maxlength = 20) {
+    ll <- length(bibfile)
+    bibkeys <- names(bibfile)
+    for(i in seq.int(ll)) {
+        filesp <- getFilesBib(bibfile[[i]])
+        if(!is.null(filesp$files)) {
+            newf <- FALSE
+            for(nfile in seq_along(filesp$files)) {
+                f1 <- justTheFile(filesp$files[nfile], rootFileDir)
+                if(nchar(f1) > maxlength) {
+                    filesp$files[nfile] <- newFname(bibkeys[i], f1,
+                                                    renamePaths, ranletters)
+                    newf <- TRUE
+                } else {
+                    ## FIXME: check for whitespace and then rename
+                }
+            }
+            if(newf) {
+                ## FIXME: create new file entry
+            }
+        }
+    }
+    ## length
+    ## spaces
+
+    ## if length bad, then just do full out changing
+    ## if only spaces, remove them
+
+    ## a flag if modification; only overwrite file field if modified
+}
+
+
+## some examples
+bibfile[[801]][5]
+bibfile[[1128]][4]
+bibfile[[255]][5]
+bibfile[[2205]][6]
+
+
 ## dbListTables(con)
 
 ## ## All the tables
-## tables <- dbListTables(con)
-## sapply(tables, function(x) dbListFields(con, x))
+tables <- dbListTables(con)
+sapply(tables, function(x) dbListFields(con, x))
 
+df <- dbReadTable(con, "Files")
 
 
 ## Note that keywords are the same as mendeley-tags in bibtex

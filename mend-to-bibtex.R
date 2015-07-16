@@ -1,6 +1,8 @@
 MendeleySQL <- "mend.sqlite"
 BibTeXFile <- "library.bib"
 out <- "new-library.bib"
+rootFileDir <- "/home/ramon/Mendeley-pdfs"
+renamePaths <- "/home/ramon/tmp"
 
 
 source("sqlite-bibtex-functions.R")
@@ -20,7 +22,11 @@ minimalDBDFchecks(res)
 
 
 bibfile <- myBibtexReader(BibTeXFile)
-bibtexDBConsistencyCheck(res, bib) 
+bibtexDBConsistencyCheck(res, bib)
+
+checkFileDirNesting(bibfile, rootFileDir, numdirs = 1)
+## Continue if things are ok
+
 
 bibfile <- addInfoToBibTex(bibfile, res)
 
@@ -33,11 +39,10 @@ jabrefGr <- jabrefGroups(con, res)
 outFullBibTex(bibfile, jabrefGr, out)
 
 
-
-
-## FIXME check here for missing latex keys
-
+## zotero moves things to new dirs?
+## FIXME: fix the nesting of directories
 ## FIXME: rename the long files
+## FIXME: how is jabref and zotre inputing and outputing path to home? with or without and intial /
 ## - fix repeated entries
 ## - write the script to clean bibtex for tablet
 
