@@ -405,11 +405,15 @@ newFname <- function(bibtexkey, oldfilename, renamePaths, ranletters = 6) {
         return(nn)
 }
 
+
 fixFileNames <- function(bibfile, rootFileDir,
                          renamePaths, ranletters = 6,
                          maxlength = 20) {
     ll <- length(bibfile)
     bibkeys <- names(bibfile)
+    ## Logic: iterate over all bibtex entries and for each one of the
+    ## files if too long, substitute. If not long, but any spaces,
+    ## substitute. If any substitution, write the file field
     for(i in seq.int(ll)) {
         filesp <- getFilesBib(bibfile[[i]])
         if(!is.null(filesp$files)) {
@@ -421,7 +425,10 @@ fixFileNames <- function(bibfile, rootFileDir,
                                                     renamePaths, ranletters)
                     newf <- TRUE
                 } else {
-                    ## FIXME: check for whitespace and then rename
+                    if(grepl(" ", f1))
+                        filesp$files[nfile] <- newFname(bibkeys[i], f1,
+                                                        renamePaths, ranletters)
+                    newf <- TRUE
                 }
             }
             if(newf) {
@@ -440,6 +447,8 @@ fixFileNames <- function(bibfile, rootFileDir,
 
 
 ## some examples
+bibfile[[1961]][]
+
 bibfile[[801]][5]
 bibfile[[1128]][4]
 bibfile[[255]][5]

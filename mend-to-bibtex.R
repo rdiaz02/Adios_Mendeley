@@ -22,7 +22,7 @@ minimalDBDFchecks(res)
 
 
 bibfile <- myBibtexReader(BibTeXFile)
-bibtexDBConsistencyCheck(res, bib)
+bibtexDBConsistencyCheck(res, bibfile)
 
 checkFileDirNesting(bibfile, rootFileDir, numdirs = 1)
 ## Continue if things are ok
@@ -42,7 +42,7 @@ outFullBibTex(bibfile, jabrefGr, out)
 ## zotero moves things to new dirs?
 ## FIXME: fix the nesting of directories
 ## FIXME: rename the long files
-## FIXME: how is jabref and zotre inputing and outputing path to home? with or without and intial /
+## FIXME: how is jabref and zotre inputing and outputing path to home? with or without and intial / and how is it seen in jabref?
 ## - fix repeated entries
 ## - write the script to clean bibtex for tablet
 
