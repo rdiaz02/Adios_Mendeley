@@ -160,7 +160,7 @@ eachFolderOut <- function(x, folderInfo = folderDocuments,
     first <- paste0(x$depth, " ExplicitGroup:",  x$name, "\\;0\\;")
     refs <- paste(getBibtexRefsGroup(x$id, folderInfo, fullDoc),
                   collapse = "\\;")
-    return(paste0(first, refs, ";;"))
+    return(paste0(first, refs, "\\;;"))
 }
 
 ## like jabrefGroups, but without taking con
@@ -385,88 +385,151 @@ checkFileDirNesting <- function(bib, rootFileDir, numdirs = 1) {
 }
 
 justTheFile <- function(x, rootFileDir) {
+    ## This will fail if more than one level of nesting in files. I assume
+    ## the directory with the files hangs directly from rootFileDir.
     strsplit(strsplit(x, rootFileDir)[[1]][2], "/")[[1]][3]
 }
 
 newFname <- function(bibtexkey, oldfilename, tmpdir, ranletters = 6) {
-    extension <- NULL
-    if(grepl("\\.tar\\.gz", oldfilename)) {
-        extension <- "tar.gz"
-    } else if(grepl("\\.tar\\.bz2", oldfilename)) {
-        extension <- "tar.bz2"
-    } else {
-        fsp <- strsplit(oldfilename, "\\.")[[1]]
-        if(length(fsp) > 1)
-            extension <- fsp[length(fsp)]
-    }
+    extension <- getFileExtension(oldfilename)
     nn <- paste0(bibtexkey, "_",
                  paste(paste(sample(letters, ranletters,
                                     replace = TRUE)),
                        collapse = ""))
     nn <- paste0(tmpdir, "/", nn)
-    if(!is.null(extension))
+    if(extension != "")
         return(paste0(nn, ".", extension))
     else
         return(nn)
 }
 
-newFileEntry <- function(files) {
-    
-
-
+createNewFileField <- function(files, extensions) {
+    if(length(files) != length(extensions))
+        stop("lengths file != extensions")
+    head <- "file = {"
+    fs <- paste0(":", files)
+    exts <- paste0(":", extensions)
+    allfiles <- paste0(paste0(fs, exts), collapse = ";")
+    return(paste0(head, allfiles, "}"))
 }
 
 
-fixFilesSingleEntry <- function(bibentry) {
+getFileExtension <- function(x) {
+    ## x is just the file name, without paths
+    extension <- ""
+    if(grepl("\\.tar\\.gz", x)) {
+        extension <- "tar.gz"
+    } else if(grepl("\\.tar\\.bz2", x)) {
+        extension <- "tar.bz2"
+    } else {
+        fsp <- strsplit(x, "\\.")[[1]]
+        if(length(fsp) > 1)
+            extension <- fsp[length(fsp)]
+    }
+    return(extension)
+}
+
+fixFilesSingleEntry <- function(bibentry, rootFileDir,
+                                renamePaths, ranletters = 6,
+                                maxlength = 20) {
     ## Returns the new entry with file names fixed, or same as input if
     ## nothing changed.
-    
+    bibkey <- getBibKey(bibentry[1])
 
+    filesp <- getFilesBib(bibentry)
+    if(!is.null(filesp$files)) {
+        newf <- FALSE
+        tmpdir <- paste0(renamePaths, "/",
+                         paste(sample(letters, 8, replace = TRUE),
+                               collapse = ""))
+        for(nfile in seq_along(filesp$files)) {
+            f1 <- justTheFile(filesp$files[nfile], rootFileDir)
+            if(nchar(f1) > maxlength) {
+                filesp$files[nfile] <- newFname(bibkey, f1,
+                                                tmpdir,
+                                                ranletters)
+                newf <- TRUE
+            } else {
+                if(grepl(" ", f1))
+                    filesp$files[nfile] <- newFname(bibkeys[i], f1,
+                                                    tmpdir, ranletters)
+                newf <- TRUE
+            }
+        }
+        if(newf) {
+            ## We need the extensions of all, included those not changed.
+            exts <- vapply(filesp$files, getFileExtension, "a")
+            newFileField <- createNewFileField(filesp$files, exts)
+            newBibEntry <- bibentry
+            ## If not last field, needs a comma
+            if(filesp$filepos != (length(bibentry) - 1))
+                newFileField <- paste0(newFileField, ",")
+            newBibEntry[filesp$filepos] <- newFileField
+            return(newBibEntry)
+        }
+    }
+    return(bibentry)
 }
+## FIXME!! I need to create the files!!! via system!!!
+
+
 
 
 fixFileNames <- function(bibfile, rootFileDir,
                          renamePaths, ranletters = 6,
                          maxlength = 20) {
-    ll <- length(bibfile)
-    bibkeys <- names(bibfile)
-    ## Logic: iterate over all bibtex entries and for each one of the
-    ## files if too long, substitute. If not long, but any spaces,
-    ## substitute. If any substitution, write the file field
-    for(i in seq.int(ll)) {
-        filesp <- getFilesBib(bibfile[[i]])
-        if(!is.null(filesp$files)) {
-            newf <- FALSE
-            tmpdir <- paste0(renamePaths, "/",
-                           paste(sample(letters, 8, replace = TRUE),
-                                 collapse = ""))
-            for(nfile in seq_along(filesp$files)) {
-                f1 <- justTheFile(filesp$files[nfile], rootFileDir)
-                if(nchar(f1) > maxlength) {
-                    filesp$files[nfile] <- newFname(bibkeys[i], f1,
-                                                    tmpdir,
-                                                    renamePaths, ranletters)
-                    newf <- TRUE
-                } else {
-                    if(grepl(" ", f1))
-                        filesp$files[nfile] <- newFname(bibkeys[i], f1,
-                                                        renamePaths, ranletters)
-                    newf <- TRUE
-                }
-            }
-            if(newf) {
-                ## FIXME: create new file entry
-            }
-        }
-    }
-    ## length
-    ## spaces
-
-    ## if length bad, then just do full out changing
-    ## if only spaces, remove them
-
-    ## a flag if modification; only overwrite file field if modified
+    ## Returns a new bibfile with file names "fixed"
+    return(lapply(bibfile, function(x)
+        fixFilesSingleEntry(x, rootFileDir, renamePaths,
+                            ranletters, maxlength)))
 }
+
+
+
+
+
+## fixFileNames <- function(bibfile, rootFileDir,
+##                          renamePaths, ranletters = 6,
+##                          maxlength = 20) {
+##     ll <- length(bibfile)
+##     bibkeys <- names(bibfile)
+##     ## Logic: iterate over all bibtex entries and for each one of the
+##     ## files if too long, substitute. If not long, but any spaces,
+##     ## substitute. If any substitution, write the file field
+##     for(i in seq.int(ll)) {
+##         filesp <- getFilesBib(bibfile[[i]])
+##         if(!is.null(filesp$files)) {
+##             newf <- FALSE
+##             tmpdir <- paste0(renamePaths, "/",
+##                            paste(sample(letters, 8, replace = TRUE),
+##                                  collapse = ""))
+##             for(nfile in seq_along(filesp$files)) {
+##                 f1 <- justTheFile(filesp$files[nfile], rootFileDir)
+##                 if(nchar(f1) > maxlength) {
+##                     filesp$files[nfile] <- newFname(bibkeys[i], f1,
+##                                                     tmpdir,
+##                                                     renamePaths, ranletters)
+##                     newf <- TRUE
+##                 } else {
+##                     if(grepl(" ", f1))
+##                         filesp$files[nfile] <- newFname(bibkeys[i], f1,
+##                                                         renamePaths, ranletters)
+##                     newf <- TRUE
+##                 }
+##             }
+##             if(newf) {
+##                 ## FIXME: create new file entry
+##             }
+##         }
+##     }
+##     ## length
+##     ## spaces
+
+##     ## if length bad, then just do full out changing
+##     ## if only spaces, remove them
+
+##     ## a flag if modification; only overwrite file field if modified
+## }
 
 
 ## some examples
@@ -475,7 +538,13 @@ bibfile[[1961]][]
 bibfile[[801]][5]
 bibfile[[1128]][4]
 bibfile[[255]][5]
-bibfile[[2205]][6]
+bibfile[[2205]][6] ## two levels of dir nesting
+
+
+
+minibib <- bibfile[c(1, 2, 3, 801, 1128, 255)]
+minibib2 <- fixFileNames(minibib, rootFileDir, renamePaths)
+outFullBibTex(minibib2, jabrefGr, out)
 
 
 ## dbListTables(con)
