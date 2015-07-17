@@ -393,8 +393,7 @@ checkFileDirNesting <- function(bib, rootFileDir, numdirs = 1) {
 justTheFile <- function(x, rootFileDir) {
     ## This will fail if more than one level of nesting in files. I assume
     ## the directory with the files hangs directly from rootFileDir.
-    tmp <- strsplit(strsplit(x, rootFileDir)[[1]][2], "/")[[1]]
-    return(c(file = ""))
+    strsplit(strsplit(x, rootFileDir)[[1]][2], "/")[[1]][3]
 }
 
 newFname <- function(bibtexkey, oldfilename, tmpdir, ranletters) {
@@ -456,6 +455,8 @@ fixFilesSingleEntry <- function(bibentry, rootFileDir,
             ## We must make sure the stupid spaces from directory names do
             ## not screw things up.
             oldpath <- gsub(" ", "\\ ", filesp$files[nfile], fixed = TRUE)
+            oldpath <- gsub("(", "\\(", oldpath, fixed = TRUE)
+            oldpath <- gsub(")", "\\)", oldpath, fixed = TRUE)
             if(nchar(f1) > maxlength) {
                 filesp$files[nfile] <- newFname(bibkey, f1,
                                                 tmpdir,
@@ -471,16 +472,16 @@ fixFilesSingleEntry <- function(bibentry, rootFileDir,
                     cat("\n Copying file failed for ", oldpath)
                     warning("\n Copying file failed for ", oldpath)
                 }
-            } else  if(grepl(" ", f1)) {
-                    filesp$files[nfile] <- newFname(bibkeys[i], f1,
-                                                    tmpdir, ranletters)
-                    newf <- TRUE
-                                    cmd <- system(paste("cp ", oldpath, " ",
+            } else if(grepl(" ", f1)) {
+                filesp$files[nfile] <- newFname(bibkeys[i], f1,
+                                                tmpdir, ranletters)
+                newf <- TRUE
+                cmd <- system(paste("cp ", oldpath, " ",
                                     filesp$files[nfile]), intern = FALSE)
-                    if(cmd) {
-                        cat("\n Copying file failed for ", oldpath)
-                        warning("\n Copying file failed for ", oldpath)
-                    }
+                if(cmd) {
+                    cat("\n Copying file failed for ", oldpath)
+                    warning("\n Copying file failed for ", oldpath)
+                }
             }
         }
         if(newf) {
@@ -522,10 +523,12 @@ bibfile[[2205]][6] ## two levels of dir nesting
 
 
 
-minibib <- bibfile[c(1, 2, 3, 801, 1128, 255, 1962)]
+minibib <- bibfile[c(2, 3, 801, 1128, 255, 1962)]
 minibib2 <- fixFileNames(minibib, rootFileDir, tmpFilePaths)
 outFullBibTex(minibib2, jabrefGr, out)
 
+
+fixFilesSingleEntry(bibfile[[1]], rootFileDir, tmpFilePaths)
 
 ## dbListTables(con)
 

@@ -41,12 +41,8 @@ jabrefGr <- jabrefGroups(con, res)
 
 outFullBibTex(bibfileFileFixed, jabrefGr, out)
 
-## FIXME: group "Group-meetings" and after are not being loaded correctlyy
-## zotero moves things to new dirs?
+## FIXME: fix the files with names changed
 ## FIXME: fix the nesting of directories
-## FIXME: rename the long files
-## FIXME: how is jabref and zotre inputing and outputing path to home? with or without and intial / and how is it seen in jabref?
-## FIXME: in zoter, if input bibtex has multiple files of same entry in different dirs, do they all go to some dir in zotero?
 ## - fix repeated entries
 ## - write the script to clean bibtex for tablet
 ## - hel-bibtex issues?
