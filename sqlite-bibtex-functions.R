@@ -388,21 +388,40 @@ justTheFile <- function(x, rootFileDir) {
     strsplit(strsplit(x, rootFileDir)[[1]][2], "/")[[1]][3]
 }
 
-newFname <- function(bibtexkey, oldfilename, renamePaths, ranletters = 6) {
-    fsp <- strsplit(oldfilename, "\\.")[[1]]
+newFname <- function(bibtexkey, oldfilename, tmpdir, ranletters = 6) {
+    extension <- NULL
+    if(grepl("\\.tar\\.gz", oldfilename)) {
+        extension <- "tar.gz"
+    } else if(grepl("\\.tar\\.bz2", oldfilename)) {
+        extension <- "tar.bz2"
+    } else {
+        fsp <- strsplit(oldfilename, "\\.")[[1]]
+        if(length(fsp) > 1)
+            extension <- fsp[length(fsp)]
+    }
     nn <- paste0(bibtexkey, "_",
                  paste(paste(sample(letters, ranletters,
                                     replace = TRUE)),
                        collapse = ""))
-    ## FIXME: the paths
-    nn <- paste0(renamePaths, "/",
-                 paste(paste(sample(letters, 8, replace = TRUE)),
-                       collapse = ""),
-                 "/", nn)
-    if(length(fsp) > 1)
-        return(paste0(nn, ".", fsp[length(fsp)]))
+    nn <- paste0(tmpdir, "/", nn)
+    if(!is.null(extension))
+        return(paste0(nn, ".", extension))
     else
         return(nn)
+}
+
+newFileEntry <- function(files) {
+    
+
+
+}
+
+
+fixFilesSingleEntry <- function(bibentry) {
+    ## Returns the new entry with file names fixed, or same as input if
+    ## nothing changed.
+    
+
 }
 
 
@@ -418,10 +437,14 @@ fixFileNames <- function(bibfile, rootFileDir,
         filesp <- getFilesBib(bibfile[[i]])
         if(!is.null(filesp$files)) {
             newf <- FALSE
+            tmpdir <- paste0(renamePaths, "/",
+                           paste(sample(letters, 8, replace = TRUE),
+                                 collapse = ""))
             for(nfile in seq_along(filesp$files)) {
                 f1 <- justTheFile(filesp$files[nfile], rootFileDir)
                 if(nchar(f1) > maxlength) {
                     filesp$files[nfile] <- newFname(bibkeys[i], f1,
+                                                    tmpdir,
                                                     renamePaths, ranletters)
                     newf <- TRUE
                 } else {
