@@ -3,8 +3,17 @@
 Why move:
 - Does not check for duplicated bibtex citation keys and will not generate
   bibtex entry if you do not have author, date entries. This sucks, as for
-  me the place I look for stuff is the bibtex file (much faster searching).
+  me the place I look for stuff is the bibtex file (much faster
+  searching).
 
+- Mendeley has cluttered interface, compared to zotero.
+- Zotero: much faster searches
+- My troubles: http://support.mendeley.com/customer/en/portal/questions/12997701-restore-from-a-local-backup?new=12997701
+
+- Sorting files into subfolders: who thought it was a good idea to use
+  spaces in the "folder" (directory) name?
+
+- In general, it is easy to shoot yourself in the foot.
 
 Why through Bibtex:
 - Because you can incorporate loads of additional information, including

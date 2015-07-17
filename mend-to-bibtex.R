@@ -2,7 +2,7 @@ MendeleySQL <- "mend.sqlite"
 BibTeXFile <- "library.bib"
 out <- "new-library.bib"
 rootFileDir <- "/home/ramon/Mendeley-pdfs"
-renamePaths <- "/home/ramon/tmp"
+tmpFilePaths <- "/home/ramon/tmp/mend"
 
 
 source("sqlite-bibtex-functions.R")
@@ -41,7 +41,7 @@ jabrefGr <- jabrefGroups(con, res)
 
 outFullBibTex(bibfileFileFixed, jabrefGr, out)
 
-
+## FIXME: group "Group-meetings" and after are not being loaded correctlyy
 ## zotero moves things to new dirs?
 ## FIXME: fix the nesting of directories
 ## FIXME: rename the long files

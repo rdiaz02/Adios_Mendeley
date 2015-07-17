@@ -181,9 +181,14 @@ eachFolderOut <- function(x, folderInfo = folderDocuments,
 ## }
 
 getBibKey <- function(x) {
-    strsplit(strsplit(x, "{",
-                      fixed = TRUE)[[1]][2], ",", fixed = TRUE)[[1]][1]
-    ## do something
+    bibk <- strsplit(strsplit(x, "{",
+                              fixed = TRUE)[[1]][2], ",", fixed = TRUE)[[1]][1]
+    if(grepl(";", bibk)) {
+        cat("You have a ';' in a bibtex key. Expect problems in jabref groups. ")
+        cat("The offending entry is ", bibk, "\n")
+        warning("You have a ';' in a bibtex key. Expect problems in jabref groups")
+    }
+    return(bibk)
 }
 
 myBibtexReader <- function(file) {
@@ -317,11 +322,12 @@ addInfoToBibTex <- function(bib, db) {
 
 
 outFullBibTex <- function(bib, jabrefgr, outfile) {
-    x1 <- paste(
+    x1 <- paste0(
         paste(lapply(bib,
                      function(x) paste(x, collapse = "\n")),
               collapse = "\n"),
-        jabrefgr, "\n\n")
+        "\n\n",
+        jabrefgr)
     write(file = outfile, x1)
 }
 
@@ -387,10 +393,11 @@ checkFileDirNesting <- function(bib, rootFileDir, numdirs = 1) {
 justTheFile <- function(x, rootFileDir) {
     ## This will fail if more than one level of nesting in files. I assume
     ## the directory with the files hangs directly from rootFileDir.
-    strsplit(strsplit(x, rootFileDir)[[1]][2], "/")[[1]][3]
+    tmp <- strsplit(strsplit(x, rootFileDir)[[1]][2], "/")[[1]]
+    return(c(file = ""))
 }
 
-newFname <- function(bibtexkey, oldfilename, tmpdir, ranletters = 6) {
+newFname <- function(bibtexkey, oldfilename, tmpdir, ranletters) {
     extension <- getFileExtension(oldfilename)
     nn <- paste0(bibtexkey, "_",
                  paste(paste(sample(letters, ranletters,
@@ -430,7 +437,7 @@ getFileExtension <- function(x) {
 }
 
 fixFilesSingleEntry <- function(bibentry, rootFileDir,
-                                renamePaths, ranletters = 6,
+                                tmpFilePaths, ranletters = 8,
                                 maxlength = 20) {
     ## Returns the new entry with file names fixed, or same as input if
     ## nothing changed.
@@ -439,21 +446,41 @@ fixFilesSingleEntry <- function(bibentry, rootFileDir,
     filesp <- getFilesBib(bibentry)
     if(!is.null(filesp$files)) {
         newf <- FALSE
-        tmpdir <- paste0(renamePaths, "/",
-                         paste(sample(letters, 8, replace = TRUE),
-                               collapse = ""))
+        ## trouble for creating new files
+        ## tmpdir <- paste0(tmpFilePaths, "/",
+        ##                  paste(sample(letters, 8, replace = TRUE),
+        ##                        collapse = ""))
+        tmpdir <- tmpFilePaths
         for(nfile in seq_along(filesp$files)) {
             f1 <- justTheFile(filesp$files[nfile], rootFileDir)
+            ## We must make sure the stupid spaces from directory names do
+            ## not screw things up.
+            oldpath <- gsub(" ", "\\ ", filesp$files[nfile], fixed = TRUE)
             if(nchar(f1) > maxlength) {
                 filesp$files[nfile] <- newFname(bibkey, f1,
                                                 tmpdir,
                                                 ranletters)
                 newf <- TRUE
-            } else {
-                if(grepl(" ", f1))
+                ## I can't use file.copy as the spaces and what not can
+                ## screw things up. And I can't use system2 either, for
+                ## some reason I just don't follow but cannot pursue. This
+                ## whole spaces thing really sucks.
+                cmd <- system(paste("cp ", oldpath, " ",
+                                    filesp$files[nfile]), intern = FALSE)
+                if(cmd) {
+                    cat("\n Copying file failed for ", oldpath)
+                    warning("\n Copying file failed for ", oldpath)
+                }
+            } else  if(grepl(" ", f1)) {
                     filesp$files[nfile] <- newFname(bibkeys[i], f1,
                                                     tmpdir, ranletters)
-                newf <- TRUE
+                    newf <- TRUE
+                                    cmd <- system(paste("cp ", oldpath, " ",
+                                    filesp$files[nfile]), intern = FALSE)
+                    if(cmd) {
+                        cat("\n Copying file failed for ", oldpath)
+                        warning("\n Copying file failed for ", oldpath)
+                    }
             }
         }
         if(newf) {
@@ -470,66 +497,19 @@ fixFilesSingleEntry <- function(bibentry, rootFileDir,
     }
     return(bibentry)
 }
-## FIXME!! I need to create the files!!! via system!!!
-
-
 
 
 fixFileNames <- function(bibfile, rootFileDir,
-                         renamePaths, ranletters = 6,
+                         tmpFilePaths, ranletters = 8,
                          maxlength = 20) {
     ## Returns a new bibfile with file names "fixed"
     return(lapply(bibfile, function(x)
-        fixFilesSingleEntry(x, rootFileDir, renamePaths,
+        fixFilesSingleEntry(x, rootFileDir, tmpFilePaths,
                             ranletters, maxlength)))
 }
 
 
 
-
-
-## fixFileNames <- function(bibfile, rootFileDir,
-##                          renamePaths, ranletters = 6,
-##                          maxlength = 20) {
-##     ll <- length(bibfile)
-##     bibkeys <- names(bibfile)
-##     ## Logic: iterate over all bibtex entries and for each one of the
-##     ## files if too long, substitute. If not long, but any spaces,
-##     ## substitute. If any substitution, write the file field
-##     for(i in seq.int(ll)) {
-##         filesp <- getFilesBib(bibfile[[i]])
-##         if(!is.null(filesp$files)) {
-##             newf <- FALSE
-##             tmpdir <- paste0(renamePaths, "/",
-##                            paste(sample(letters, 8, replace = TRUE),
-##                                  collapse = ""))
-##             for(nfile in seq_along(filesp$files)) {
-##                 f1 <- justTheFile(filesp$files[nfile], rootFileDir)
-##                 if(nchar(f1) > maxlength) {
-##                     filesp$files[nfile] <- newFname(bibkeys[i], f1,
-##                                                     tmpdir,
-##                                                     renamePaths, ranletters)
-##                     newf <- TRUE
-##                 } else {
-##                     if(grepl(" ", f1))
-##                         filesp$files[nfile] <- newFname(bibkeys[i], f1,
-##                                                         renamePaths, ranletters)
-##                     newf <- TRUE
-##                 }
-##             }
-##             if(newf) {
-##                 ## FIXME: create new file entry
-##             }
-##         }
-##     }
-##     ## length
-##     ## spaces
-
-##     ## if length bad, then just do full out changing
-##     ## if only spaces, remove them
-
-##     ## a flag if modification; only overwrite file field if modified
-## }
 
 
 ## some examples
@@ -542,8 +522,8 @@ bibfile[[2205]][6] ## two levels of dir nesting
 
 
 
-minibib <- bibfile[c(1, 2, 3, 801, 1128, 255)]
-minibib2 <- fixFileNames(minibib, rootFileDir, renamePaths)
+minibib <- bibfile[c(1, 2, 3, 801, 1128, 255, 1962)]
+minibib2 <- fixFileNames(minibib, rootFileDir, tmpFilePaths)
 outFullBibTex(minibib2, jabrefGr, out)
 
 
