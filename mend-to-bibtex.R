@@ -34,17 +34,21 @@ bibfile <- addInfoToBibTex(bibfile, res)
 bibfileFileFixed <- fixFileNames(bibfile)
 
 
+## FIXME: check bibkeys for no weird things like &, etc.
+
 jabrefGr <- jabrefGroups(con, res)
 ## If you want to see what it looks like
 ## write(file = "jabref-groups.txt",
 ##       jabrefGr)
 
+
+
+
 outFullBibTex(bibfileFileFixed, jabrefGr, out)
 
-## FIXME: fix the files with names changed
 ## FIXME: fix the nesting of directories
 ## - fix repeated entries
-## - write the script to clean bibtex for tablet
+## - write the script to clean bibtex for tablet: entr project: http://entrproject.org/
 ## - hel-bibtex issues?
 
 ## df1 <- dbReadTable(con, "DocumentFolders")[, -3] ## remove "status" column

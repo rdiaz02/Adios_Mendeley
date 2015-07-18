@@ -22,7 +22,7 @@ parentDir <- "/home/ramon/Mendeley-pdfs"
 
 ###########################################################################
 gsubTheCrap <- function(x) {
-    ## this is a good example of the kinds of things that Mendeley makes
+    ## This is a good example of the kinds of things that Mendeley makes
     ## possible, and shouldn't
     x <- gsub(" ", "\\ ", x, fixed = TRUE)
     x <- gsub("(", "\\(", x, fixed = TRUE)

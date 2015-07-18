@@ -435,6 +435,20 @@ getFileExtension <- function(x) {
     return(extension)
 }
 
+gsubTheCrap <- function(x) {
+    ## This is a good example of the kinds of things that Mendeley makes
+    ## possible, and shouldn't
+    x <- gsub(" ", "\\ ", x, fixed = TRUE)
+    x <- gsub("(", "\\(", x, fixed = TRUE)
+    x <- gsub(")", "\\)", x, fixed = TRUE)
+    x <- gsub("'", "\\'", x, fixed = TRUE)
+    x <- gsub("&", "\\&", x, fixed = TRUE)
+    return(x)
+}
+
+
+
+
 fixFilesSingleEntry <- function(bibentry, rootFileDir,
                                 tmpFilePaths, ranletters = 8,
                                 maxlength = 20) {
@@ -454,9 +468,11 @@ fixFilesSingleEntry <- function(bibentry, rootFileDir,
             f1 <- justTheFile(filesp$files[nfile], rootFileDir)
             ## We must make sure the stupid spaces from directory names do
             ## not screw things up.
-            oldpath <- gsub(" ", "\\ ", filesp$files[nfile], fixed = TRUE)
-            oldpath <- gsub("(", "\\(", oldpath, fixed = TRUE)
-            oldpath <- gsub(")", "\\)", oldpath, fixed = TRUE)
+            oldpath <- gsubTheCrap(ilesp$files[nfile])
+            ## oldpath <- gsub(" ", "\\ ", filesp$files[nfile], fixed = TRUE)
+            ## oldpath <- gsub("(", "\\(", oldpath, fixed = TRUE)
+            ## oldpath <- gsub(")", "\\)", oldpath, fixed = TRUE)
+            
             if(nchar(f1) > maxlength) {
                 filesp$files[nfile] <- newFname(bibkey, f1,
                                                 tmpdir,
