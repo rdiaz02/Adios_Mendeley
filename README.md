@@ -27,6 +27,12 @@ Why move:
   have removed which results in the broken link in mendeley and paths to
   inexistent files in the bibtex file.
 
+- No export of bibtex entry if no key.
+
+- spaces and ' and & and ... in file and directory names.
+
+- very long file and directory names.
+
 
 
 Why through Bibtex:
@@ -54,3 +60,13 @@ Notes and warnings
 - Collections/folders: tried it only with two levels. Should work with
   more convoluted ones, since algorithms are fairly simple, but I have not
   checked it.
+
+
+
+
+
+Todo
+## - write the script to clean bibtex for tablet: entr project: http://entrproject.org/
+## - helm-bibtex issues?
+
+
