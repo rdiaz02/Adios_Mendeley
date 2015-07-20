@@ -63,6 +63,10 @@ Notes and warnings
 
 
 
+Logic
+=====
+
+keywords are imported as tags.
 
 
 Todo
