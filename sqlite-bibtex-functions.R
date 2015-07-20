@@ -404,7 +404,7 @@ justTheFile <- function(x, rootFileDir) {
 
 newFname <- function(bibtexkey, oldfilename, tmpdir, ranletters) {
     extension <- getFileExtension(oldfilename)
-    nn <- paste0(bibtexkey, "_",
+    nn <- paste0(bibtexkey, "-",
                  paste(paste(sample(letters, ranletters,
                                     replace = TRUE)),
                        collapse = ""))
@@ -499,7 +499,7 @@ fixFilesSingleEntry <- function(bibentry, rootFileDir,
                 ## screw things up. And I can't use system2 either, for
                 ## some reason I just don't follow but cannot pursue. This
                 ## whole spaces thing really sucks.
-                cmd <- system(paste0("cp", " \'", oldpath, "\' ",
+                cmd <- system(paste("cp", shQuote(oldpath), 
                        filesp$files[nfile]), intern = FALSE)
                 ## cmd <- system(paste("cp ", oldpath, " ",
                 ##                     filesp$files[nfile]), intern = FALSE)
@@ -535,73 +535,6 @@ fixFilesSingleEntry <- function(bibentry, rootFileDir,
     return(bibentry)
 }
 
-
-## fixFilesSingleEntry0 <- function(bibentry, rootFileDir,
-##                                 tmpFilePaths, ranletters = 8,
-##                                 maxlength = 20) {
-##     ## Returns the new entry with file names fixed, or same as input if
-##     ## nothing changed.
-##     bibkey <- getBibKey(bibentry[1])
-
-##     filesp <- getFilesBib(bibentry)
-##     if(!is.null(filesp$files)) {
-##         newf <- FALSE
-##         ## trouble for creating new files
-##         ## tmpdir <- paste0(tmpFilePaths, "/",
-##         ##                  paste(sample(letters, 8, replace = TRUE),
-##         ##                        collapse = ""))
-##         tmpdir <- tmpFilePaths
-##         for(nfile in seq_along(filesp$files)) {
-##             f1 <- justTheFile(filesp$files[nfile], rootFileDir)
-##             ## We must make sure the stupid spaces from directory names do
-##             ## not screw things up.
-##             oldpath <- gsubTheCrap(filesp$files[nfile])
-##             ## oldpath <- gsub(" ", "\\ ", filesp$files[nfile], fixed = TRUE)
-##             ## oldpath <- gsub("(", "\\(", oldpath, fixed = TRUE)
-##             ## oldpath <- gsub(")", "\\)", oldpath, fixed = TRUE)
-            
-##             if(nchar(f1) > maxlength) {
-##                 filesp$files[nfile] <- newFname(bibkey, f1,
-##                                                 tmpdir,
-##                                                 ranletters)
-##                 newf <- TRUE
-##                 ## I can't use file.copy as the spaces and what not can
-##                 ## screw things up. And I can't use system2 either, for
-##                 ## some reason I just don't follow but cannot pursue. This
-##                 ## whole spaces thing really sucks.
-##                 cmd <- system(paste("cp ", oldpath, " ",
-##                                     filesp$files[nfile]), intern = FALSE)
-##                 if(cmd) {
-##                     cat("\n Copying file failed for ", oldpath)
-##                     warning("\n Copying file failed for ", oldpath)
-##                 }
-##             } else if(grepl(" ", f1)) {
-##                 filesp$files[nfile] <- newFname(bibkeys[i], f1,
-##                                                 tmpdir, ranletters)
-##                 newf <- TRUE
-##                 cmd <- system(paste("cp ", oldpath, " ",
-##                                     filesp$files[nfile]), intern = FALSE)
-##                 if(cmd) {
-##                     cat("\n Copying file failed for ", oldpath)
-##                     warning("\n Copying file failed for ", oldpath)
-##                 }
-##             }
-##         }
-##         if(newf) {
-##             ## We need the extensions of all, included those not changed.
-##             exts <- vapply(filesp$files, getFileExtension, "a")
-##             newFileField <- createNewFileField(filesp$files, exts)
-##             newBibEntry <- bibentry
-##             ## If not last field, needs a comma
-##             if(filesp$filepos != (length(bibentry) - 1))
-##                 newFileField <- paste0(newFileField, ",")
-##             newBibEntry[filesp$filepos] <- newFileField
-##             return(newBibEntry)
-##         }
-##     }
-##     return(bibentry)
-## }
-
 fixFileNames <- function(bibfile, rootFileDir,
                          tmpFilePaths, ranletters = 8,
                          maxlength = 40) {
@@ -633,10 +566,6 @@ fixFileNames <- function(bibfile, rootFileDir,
 ## fixFilesSingleEntry(bibfile[[1]], rootFileDir, tmpFilePaths)
 
 
-
-
-
-
 ## dbListTables(con)
 
 ## ## All the tables
@@ -644,6 +573,10 @@ fixFileNames <- function(bibfile, rootFileDir,
 ## sapply(tables, function(x) dbListFields(con, x))
 
 ## df <- dbReadTable(con, "Files")
+
+
+## - exporting from Mendeley the folders
+##     - It is in the DocumentFolders and DocumentFoldersBase (for names)
 
 
 ## Note that keywords are the same as mendeley-tags in bibtex
@@ -671,6 +604,25 @@ fixFileNames <- function(bibfile, rootFileDir,
 
 
 
+## Miscell stuff
+## Notes in the PDF
+## dbReadTable(con, "FileNotes")[1:10, ] ## notes fields note and baseNote
+## ## are identical But those I already have in the PDF. Since easy and
+## ## cheap, make sure I have all.
+
+## ## Notes in the entry itself
+## dbReadTable(con, "DocumentNotes")
+## ## use the text field
+
+## ## I need date added
+
+## dbListFields(con, "Documents")
+
+
+
+## dd <- dbReadTable(con, "Documents")
+
+
 
 
 ## library(RefManageR)
@@ -680,4 +632,51 @@ fixFileNames <- function(bibfile, rootFileDir,
 
 ## bibfile <- read.bib(file = BibTeXFile) ## Nope: ignores incomplete entries
 ## bibfile <- ReadBib(file = BibTeXFile, check = FALSE): Drops fields I care about
+
+
+
+## df1 <- dbReadTable(con, "DocumentFolders")[, -3] ## remove "status" column
+## df2 <- dbReadTable(con, "DocumentFoldersBase")
+## folders <- rbind(df1, df2)
+
+## folders <- foldersDBread(con)
+## Then use bibtex key and folder name.
+## folderDocuments <- by(folders, folders$folderId,
+##                       function(x) {unique(x$documentId)})
+
+## folderNames <- dbReadTable(con, "Folders")[, c(1, 3, 4)]
+
+
+
+## folderNames$depth <- 0
+## folderNames$depth[folderNames$parentId %in% c(0, -1) ] <- 1
+## depthFolder <- function(id, df = folderNames) {
+##     ## In terms of id, because easier for error checking.
+##     pos <- which(df$id == id)
+##     parentId <- df[pos, "parentId"]
+##     if(parentId %in% c(0, -1) ) return(1)
+##     else {
+##         posParent <- which(df$id == parentId)
+##         return(df[posParent, "depth"] + 1)
+##     }
+## }
+## changesDepth <- TRUE
+## while(changesDepth) {
+##     formerDepth <- folderNames$depth
+##     folderNames$depth <- sapply(folderNames$id, depthFolder)
+##     if(all(formerDepth == folderNames$depth))
+##         changesDepth <- FALSE
+## }
+
+
+
+
+## folderNames$depth <- computeFolderDepth(folderNames)
+## orderedFolderNames <- orderFolderNames(folderNames)
+
+
+
+
+
+
 
