@@ -20,17 +20,6 @@
 
 ## Other things you need to specify and we assume:
 
-##   - rootFileDir: we assume all your PDFs (or ps, or tar.gz ---any file
-##   associated with an entry) live in directories as follows:
-##         /rootFileDir/some_other_directory/file_name.pdf
-
-##   where the some_other_directory is generally the name of the entry or
-##   similar.  The name is not very relevant. What matters here is that I
-##   assume that there is exactly one directory between the name of the
-##   file and the rootFileDir. This of course need not be so. It is the
-##   way I have things organized, and the code expects that. Change at
-##   will. (Search for functions that use 'rootFileDir')
-
 ##   - tmpFilePaths: a temporary holder for files. We rename many
 ##   files. This directory needs to exist. Files will be placed in there,
 ##   and Zotero will take files from there. After all is done, you can
@@ -43,7 +32,7 @@
 MendeleySQL <- "mend.sqlite"
 BibTeXFile <- "library-fixed.bib"
 out <- "new-library.bib" ## the new bibtex file that will be created
-rootFileDir <- "/home/ramon/Mendeley-pdfs" ## The Mendeley pdfs hang from here.
+## rootFileDir <- "/home/ramon/Mendeley-pdfs" ## The Mendeley pdfs hang from here.
 tmpFilePaths <- "/home/ramon/tmp/mend" ## A temporary directory for
                                        ## placing renamed files.
 
@@ -62,15 +51,14 @@ minimalDBDFchecks(res)
 bibfile <- myBibtexReaderandCheck(BibTeXFile)
 bibtexDBConsistencyCheck(res, bibfile)
 
-checkFileDirNesting(bibfile, rootFileDir, numdirs = 1)
 ## Continue if things are ok
 
 ## Add the extra information not exported by default by Mendeley
 bibfile2 <- addInfoToBibTex(bibfile, res)
 
-## Fix file names: nothing longer than 20 chars and no spaces in file names.
-bibfileFileFixed <- fixFileNames(bibfile2, rootFileDir, tmpFilePaths)
-
+## Fix file names: nothing longer than maxlength and no spaces or special
+## chars in in file names.
+bibfileFileFixed <- fixFileNames(bibfile2, tmpFilePaths)
 
 
 jabrefGr <- jabrefGroups(con, res)

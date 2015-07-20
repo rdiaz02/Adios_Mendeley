@@ -88,8 +88,6 @@ foldersDBread <- function(con) {
     return(folders)
 }
 
-
-
 ## parentId takes 0, -1, and then values that match those of other folder
 ## ids. No idea what is the differences between 0 and -1.
 
@@ -108,7 +106,6 @@ computeFolderDepth <- function(folderNames) {
         else {
             posParent <- which(df$id == parentId)
             return(prevdepth[posParent] + 1)
-##            return(df[posParent, "depth"] + 1)
         }
     }
     changesDepth <- TRUE
@@ -163,23 +160,6 @@ eachFolderOut <- function(x, folderInfo = folderDocuments,
     return(paste0(first, refs, "\\;;"))
 }
 
-## like jabrefGroups, but without taking con
-## outFolders <- function(folders, folderInfo, fullDoc) {
-##     head <- "\n@comment{jabref-meta: groupsversion:3;}\n
-## @comment{jabref-meta: groupstree:\n0 AllEntriesGroup:;\n"
-##     lout <- vector(mode = "list", nrow(folders))
-##     ## lout <- lapply()
-##      for(ff in seq.int(nrow(folders))) {
-##          lout[ff] <- eachFolderOut(folders[ff, ],
-##                                    folderInfo,
-##                                    fullDoc)
-##      }
-##     lout <- paste(lout, collapse = "\n")
-##     return(paste0(head,
-##                  lout,
-##                  "\n}"))
-## }
-
 getBibKey <- function(x) {
     bibk <- strsplit(strsplit(x, "{",
                               fixed = TRUE)[[1]][2], ",", fixed = TRUE)[[1]][1]
@@ -231,7 +211,6 @@ bibtexDBConsistencyCheck <- function(res, bib) {
 
 
 getFolderInfo <- function(con) {
-
     ## folder Id, name as a string, and the parentId
     folderNames <- dbReadTable(con, "Folders")[, c(1, 3, 4)]
     ## documentID and folderId
@@ -291,32 +270,6 @@ getAField <- function(x, field) {
     return(grep(paste0("^", field, " = \\{"), x))
 }
 
-
-## checkSameKeywordsMendtags <- function(x) {
-##     kwd <- gsub("^keywords", "", x[getAField(x, "keywords")])
-##     mt <- gsub("^mendeley-tags", "", x[getAField(x, "mendeley-tags")])
-##     if(length(kwd) && length(mt)) {
-##         if(kwd != mt) {
-##             stop("Keyword != mendeley-tags in ", x[1])
-##         }
-##     }
-##     if(length(mt) && !length(kwd))
-##         stop("kwd no length in", x[1])
-## }
-
-## checkAnnoteInMendnote <- function(x) {
-##     an <- gsub("^annote", "", x[getAField(x, "annote")])
-##     mn <- gsub("^mendnotes", "", x[getAField(x, "mendnotes")])
-##     if(length(an) && !length(mn)) {
-##         stop("an but not mn in ", x[1])
-##     }
-##     if(length(an) && length(mn)) {
-##         if(! (an %in% mn )) {
-##             stop("annote not all in mendnote in ", x[1])
-##         }
-##     }
-## }
-
 renameField <- function(x, oldname, newname) {
     pos <- getAField(x, oldname)
     x[pos] <- gsub(paste0("^", oldname, " = \\{"),
@@ -351,11 +304,11 @@ combineFields <- function(x, field1, field2, tokenize) {
             f1 <- paste(unique(f1, f2), collapse = ",")
         }
     }
-
+    ## Adding a comma does no harm, even if it is the last field
     if(length(pf1))
-        x[pf1] <- paste0(field1, " = \\{", f1, "\\},")
+        x[pf1] <- paste0(field1, " = {", f1, "},")
     else if(length(pf2))
-        x[pf2] <- paste0(field1, " = \\{", f1, "\\},")
+        x[pf2] <- paste0(field1, " = {", f1, "},")
     if(length(pf2) && length(pf1))
         x <- x[-pf2]
     return(x)
@@ -450,43 +403,9 @@ getFilesBib <- function(x) {
 }
 
 
-
-innerCheckDirNesting <- function(x, i,  rootFileDir, num.dirs = 1) {
-    ## Make sure all exactly one directory
-    if(is.null(x))
-        return(TRUE)
-    y <- strsplit(x, rootFileDir)[[1]][2]
-    numd <- length(grep("/", strsplit(y, '')[[1]], value = FALSE)) - 1
-    if(num.dirs != numd) {
-        cat("\n Here, at i = ", i, "\n")
-        cat(y)
-        cat("and this is x ", x)
-        warning("not expected number of directories. Fix before continuing")
-        return(FALSE)
-    } else {
-        return(TRUE)
-    }
-}
-
-checkFileDirNesting <- function(bib, rootFileDir, numdirs = 1) {
-    ## numdirs is the number of directories between the rootFileDir and
-    ## the file.
-
-    ## Yes, we go through same data several times, but checking this is a
-    ## distinct operation.
-    thefiles <- lapply(bib, function(x) getFilesBib(x)$files)
-    ## yes, loop so as to give the exact place where it fails
-    out <- rep(TRUE, length(thefiles))
-    for(i in seq.int(length(thefiles)))
-        out[i] <- innerCheckDirNesting(thefiles[[i]], i, rootFileDir, numdirs)
-    if(!all(out))
-        stop("checkFileDirNesting failed")
-}
-
-justTheFile <- function(x, rootFileDir) {
-    ## This will fail if more than one level of nesting in files. I assume
-    ## the directory with the files hangs directly from rootFileDir.
-    strsplit(strsplit(x, rootFileDir)[[1]][2], "/")[[1]][3]
+justTheFile <- function(x) {
+    tmp <- strsplit(x, "/")[[1]]
+    return(tmp[length(tmp)])
 }
 
 newFname <- function(bibtexkey, oldfilename, tmpdir, ranletters) {
@@ -528,21 +447,7 @@ getFileExtension <- function(x) {
     return(extension)
 }
 
-## gsubTheCrap <- function(x) {
-##     ## This is a good example of the kinds of things that Mendeley makes
-##     ## possible, and shouldn't
-##     x <- gsub(" ", "\\ ", x, fixed = TRUE)
-##     x <- gsub("(", "\\(", x, fixed = TRUE)
-##     x <- gsub(")", "\\)", x, fixed = TRUE)
-##     x <- gsub("'", "\\'", x, fixed = TRUE)
-##     x <- gsub("&", "\\&", x, fixed = TRUE)
-##     return(x)
-## }
-
-
-
-
-fixFilesSingleEntry <- function(bibentry, rootFileDir,
+fixFilesSingleEntry <- function(bibentry, 
                                 tmpFilePaths, ranletters = 8,
                                 maxlength = 40) {
     ## Returns the new entry with file names fixed, or same as input if
@@ -566,7 +471,7 @@ fixFilesSingleEntry <- function(bibentry, rootFileDir,
         ##                        collapse = ""))
         tmpdir <- tmpFilePaths
         for(nfile in seq_along(filesp$files)) {
-            f1 <- justTheFile(filesp$files[nfile], rootFileDir)
+            f1 <- justTheFile(filesp$files[nfile])
             ## We must make sure the stupid spaces from directory names do
             ## not screw things up.
 
@@ -594,18 +499,7 @@ fixFilesSingleEntry <- function(bibentry, rootFileDir,
                     cat("\n Copying file failed for ", oldpath)
                     warning("\n Copying file failed for ", oldpath)
                 }
-            } ## else if(grepl("[^a-zA-Z0-9._-]", f1)) {
-              ##   ## remove any weird characters
-              ##   filesp$files[nfile] <- newFname(bibkeys[i], f1,
-              ##                                   tmpdir, ranletters)
-              ##   newf <- TRUE
-              ##   cmd <- system(paste0("cp", " \'", oldpath, "\' ",
-              ##          filesp$files[nfile]), intern = FALSE)
-              ##   if(cmd) {
-              ##       cat("\n Copying file failed for ", oldpath)
-              ##       warning("\n Copying file failed for ", oldpath)
-              ##   }
-            ## }
+            } 
         }
         if(newf) {
             ## We need the extensions of all, included those not changed.
@@ -622,14 +516,87 @@ fixFilesSingleEntry <- function(bibentry, rootFileDir,
     return(bibentry)
 }
 
-fixFileNames <- function(bibfile, rootFileDir,
+fixFileNames <- function(bibfile,
                          tmpFilePaths, ranletters = 8,
                          maxlength = 40) {
     ## Returns a new bibfile with file names "fixed"
     return(lapply(bibfile, function(x)
-        fixFilesSingleEntry(x, rootFileDir, tmpFilePaths,
+        fixFilesSingleEntry(x, tmpFilePaths,
                             ranletters, maxlength)))
 }
+
+
+## Not used; these were an ugly kludge
+## checkSameKeywordsMendtags <- function(x) {
+##     kwd <- gsub("^keywords", "", x[getAField(x, "keywords")])
+##     mt <- gsub("^mendeley-tags", "", x[getAField(x, "mendeley-tags")])
+##     if(length(kwd) && length(mt)) {
+##         if(kwd != mt) {
+##             stop("Keyword != mendeley-tags in ", x[1])
+##         }
+##     }
+##     if(length(mt) && !length(kwd))
+##         stop("kwd no length in", x[1])
+## }
+
+## checkAnnoteInMendnote <- function(x) {
+##     an <- gsub("^annote", "", x[getAField(x, "annote")])
+##     mn <- gsub("^mendnotes", "", x[getAField(x, "mendnotes")])
+##     if(length(an) && !length(mn)) {
+##         stop("an but not mn in ", x[1])
+##     }
+##     if(length(an) && length(mn)) {
+##         if(! (an %in% mn )) {
+##             stop("annote not all in mendnote in ", x[1])
+##         }
+##     }
+## }
+
+## No longer needed
+## innerCheckDirNesting <- function(x, i,  rootFileDir, num.dirs = 1) {
+##     ## Make sure all exactly one directory
+##     if(is.null(x))
+##         return(TRUE)
+##     y <- strsplit(x, rootFileDir)[[1]][2]
+##     numd <- length(grep("/", strsplit(y, '')[[1]], value = FALSE)) - 1
+##     if(num.dirs != numd) {
+##         cat("\n Here, at i = ", i, "\n")
+##         cat(y)
+##         cat("and this is x ", x)
+##         warning("not expected number of directories. Fix before continuing")
+##         return(FALSE)
+##     } else {
+##         return(TRUE)
+##     }
+## }
+
+## checkFileDirNesting <- function(bib, rootFileDir, numdirs = 1) {
+##     ## numdirs is the number of directories between the rootFileDir and
+##     ## the file.
+
+##     ## Yes, we go through same data several times, but checking this is a
+##     ## distinct operation.
+##     thefiles <- lapply(bib, function(x) getFilesBib(x)$files)
+##     ## yes, loop so as to give the exact place where it fails
+##     out <- rep(TRUE, length(thefiles))
+##     for(i in seq.int(length(thefiles)))
+##         out[i] <- innerCheckDirNesting(thefiles[[i]], i, rootFileDir, numdirs)
+##     if(!all(out))
+##         stop("checkFileDirNesting failed")
+## }
+
+
+## gsubTheCrap <- function(x) {
+##     ## This is a good example of the kinds of things that Mendeley makes
+##     ## possible, and shouldn't
+##     x <- gsub(" ", "\\ ", x, fixed = TRUE)
+##     x <- gsub("(", "\\(", x, fixed = TRUE)
+##     x <- gsub(")", "\\)", x, fixed = TRUE)
+##     x <- gsub("'", "\\'", x, fixed = TRUE)
+##     x <- gsub("&", "\\&", x, fixed = TRUE)
+##     return(x)
+## }
+
 
 
 
