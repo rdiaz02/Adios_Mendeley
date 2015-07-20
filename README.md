@@ -68,6 +68,10 @@ Logic
 
 keywords are imported as tags.
 
+Use bibitex from mend, and add fields and folders. Fields from sqlite,
+folders from sqlite plus some massaging. Restropectibvely, better to have
+forgotten about Mendeley bibtex and have generated my own.
+
 
 Todo
 ## - write the script to clean bibtex for tablet: entr project: http://entrproject.org/
