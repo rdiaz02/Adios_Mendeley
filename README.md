@@ -15,6 +15,20 @@ Why move:
 
 - In general, it is easy to shoot yourself in the foot.
 
+- Keyboard shortcuts: few, and where are they documented? Unavoidable to
+  use/abuse the mouse.
+
+- No BibTeX export if no author/year (i.e., no key)
+
+- Inflexible what fields you are shown (some you cannot uncheck, which
+  sucks with long abstracts)
+
+- Persisten errors in entries, like adding links to file that you
+  have removed which results in the broken link in mendeley and paths to
+  inexistent files in the bibtex file.
+
+
+
 Why through Bibtex:
 - Because you can incorporate loads of additional information, including
   the Mendely folders the tags, etc.
