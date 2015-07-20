@@ -1,5 +1,5 @@
 MendeleySQL <- "mend.sqlite"
-BibTeXFile <- "library.bib"
+BibTeXFile <- "library-fixed.bib"
 out <- "new-library.bib"
 rootFileDir <- "/home/ramon/Mendeley-pdfs"
 tmpFilePaths <- "/home/ramon/tmp/mend"

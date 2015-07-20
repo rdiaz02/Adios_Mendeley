@@ -441,28 +441,36 @@ getFileExtension <- function(x) {
     return(extension)
 }
 
-gsubTheCrap <- function(x) {
-    ## This is a good example of the kinds of things that Mendeley makes
-    ## possible, and shouldn't
-    x <- gsub(" ", "\\ ", x, fixed = TRUE)
-    x <- gsub("(", "\\(", x, fixed = TRUE)
-    x <- gsub(")", "\\)", x, fixed = TRUE)
-    x <- gsub("'", "\\'", x, fixed = TRUE)
-    x <- gsub("&", "\\&", x, fixed = TRUE)
-    return(x)
-}
+## gsubTheCrap <- function(x) {
+##     ## This is a good example of the kinds of things that Mendeley makes
+##     ## possible, and shouldn't
+##     x <- gsub(" ", "\\ ", x, fixed = TRUE)
+##     x <- gsub("(", "\\(", x, fixed = TRUE)
+##     x <- gsub(")", "\\)", x, fixed = TRUE)
+##     x <- gsub("'", "\\'", x, fixed = TRUE)
+##     x <- gsub("&", "\\&", x, fixed = TRUE)
+##     return(x)
+## }
 
 
 
 
 fixFilesSingleEntry <- function(bibentry, rootFileDir,
                                 tmpFilePaths, ranletters = 8,
-                                maxlength = 20) {
+                                maxlength = 40) {
     ## Returns the new entry with file names fixed, or same as input if
     ## nothing changed.
+
+    ## What is fixing? That no file name be longer than maxlength
+    ## (actually, final name can be up to bibkey + ranletters) and that it
+    ## contains only a-Z, 0-9, _, . So nothing like ?&:, etc and no
+    ## spaces either. And not _, as that can mess things up later.
+    
     bibkey <- getBibKey(bibentry[1])
 
     filesp <- getFilesBib(bibentry)
+    newf <- FALSE
+
     if(!is.null(filesp$files)) {
         newf <- FALSE
         ## trouble for creating new files
@@ -474,12 +482,15 @@ fixFilesSingleEntry <- function(bibentry, rootFileDir,
             f1 <- justTheFile(filesp$files[nfile], rootFileDir)
             ## We must make sure the stupid spaces from directory names do
             ## not screw things up.
-            oldpath <- gsubTheCrap(filesp$files[nfile])
-            ## oldpath <- gsub(" ", "\\ ", filesp$files[nfile], fixed = TRUE)
-            ## oldpath <- gsub("(", "\\(", oldpath, fixed = TRUE)
-            ## oldpath <- gsub(")", "\\)", oldpath, fixed = TRUE)
+
+            ## No longer gsub and replacing by escaped chars, as we now
+            ## quote the path. But need to fix the \\& and \\_ that
+            ## Mendeley inserted
+            oldpath <- gsub("\\&", "&", filesp$files[nfile], fixed = TRUE)
+            oldpath <- gsub("\\_", "_", oldpath, fixed = TRUE)
+            ## oldpath <- gsubTheCrap(filesp$files[nfile])
             
-            if(nchar(f1) > maxlength) {
+            if( (nchar(f1) > maxlength) || grepl("[^a-zA-Z0-9.-]", f1) ) {
                 filesp$files[nfile] <- newFname(bibkey, f1,
                                                 tmpdir,
                                                 ranletters)
@@ -488,23 +499,26 @@ fixFilesSingleEntry <- function(bibentry, rootFileDir,
                 ## screw things up. And I can't use system2 either, for
                 ## some reason I just don't follow but cannot pursue. This
                 ## whole spaces thing really sucks.
-                cmd <- system(paste("cp ", oldpath, " ",
-                                    filesp$files[nfile]), intern = FALSE)
+                cmd <- system(paste0("cp", " \'", oldpath, "\' ",
+                       filesp$files[nfile]), intern = FALSE)
+                ## cmd <- system(paste("cp ", oldpath, " ",
+                ##                     filesp$files[nfile]), intern = FALSE)
                 if(cmd) {
                     cat("\n Copying file failed for ", oldpath)
                     warning("\n Copying file failed for ", oldpath)
                 }
-            } else if(grepl(" ", f1)) {
-                filesp$files[nfile] <- newFname(bibkeys[i], f1,
-                                                tmpdir, ranletters)
-                newf <- TRUE
-                cmd <- system(paste("cp ", oldpath, " ",
-                                    filesp$files[nfile]), intern = FALSE)
-                if(cmd) {
-                    cat("\n Copying file failed for ", oldpath)
-                    warning("\n Copying file failed for ", oldpath)
-                }
-            }
+            } ## else if(grepl("[^a-zA-Z0-9._-]", f1)) {
+              ##   ## remove any weird characters
+              ##   filesp$files[nfile] <- newFname(bibkeys[i], f1,
+              ##                                   tmpdir, ranletters)
+              ##   newf <- TRUE
+              ##   cmd <- system(paste0("cp", " \'", oldpath, "\' ",
+              ##          filesp$files[nfile]), intern = FALSE)
+              ##   if(cmd) {
+              ##       cat("\n Copying file failed for ", oldpath)
+              ##       warning("\n Copying file failed for ", oldpath)
+              ##   }
+            ## }
         }
         if(newf) {
             ## We need the extensions of all, included those not changed.
@@ -522,9 +536,75 @@ fixFilesSingleEntry <- function(bibentry, rootFileDir,
 }
 
 
+## fixFilesSingleEntry0 <- function(bibentry, rootFileDir,
+##                                 tmpFilePaths, ranletters = 8,
+##                                 maxlength = 20) {
+##     ## Returns the new entry with file names fixed, or same as input if
+##     ## nothing changed.
+##     bibkey <- getBibKey(bibentry[1])
+
+##     filesp <- getFilesBib(bibentry)
+##     if(!is.null(filesp$files)) {
+##         newf <- FALSE
+##         ## trouble for creating new files
+##         ## tmpdir <- paste0(tmpFilePaths, "/",
+##         ##                  paste(sample(letters, 8, replace = TRUE),
+##         ##                        collapse = ""))
+##         tmpdir <- tmpFilePaths
+##         for(nfile in seq_along(filesp$files)) {
+##             f1 <- justTheFile(filesp$files[nfile], rootFileDir)
+##             ## We must make sure the stupid spaces from directory names do
+##             ## not screw things up.
+##             oldpath <- gsubTheCrap(filesp$files[nfile])
+##             ## oldpath <- gsub(" ", "\\ ", filesp$files[nfile], fixed = TRUE)
+##             ## oldpath <- gsub("(", "\\(", oldpath, fixed = TRUE)
+##             ## oldpath <- gsub(")", "\\)", oldpath, fixed = TRUE)
+            
+##             if(nchar(f1) > maxlength) {
+##                 filesp$files[nfile] <- newFname(bibkey, f1,
+##                                                 tmpdir,
+##                                                 ranletters)
+##                 newf <- TRUE
+##                 ## I can't use file.copy as the spaces and what not can
+##                 ## screw things up. And I can't use system2 either, for
+##                 ## some reason I just don't follow but cannot pursue. This
+##                 ## whole spaces thing really sucks.
+##                 cmd <- system(paste("cp ", oldpath, " ",
+##                                     filesp$files[nfile]), intern = FALSE)
+##                 if(cmd) {
+##                     cat("\n Copying file failed for ", oldpath)
+##                     warning("\n Copying file failed for ", oldpath)
+##                 }
+##             } else if(grepl(" ", f1)) {
+##                 filesp$files[nfile] <- newFname(bibkeys[i], f1,
+##                                                 tmpdir, ranletters)
+##                 newf <- TRUE
+##                 cmd <- system(paste("cp ", oldpath, " ",
+##                                     filesp$files[nfile]), intern = FALSE)
+##                 if(cmd) {
+##                     cat("\n Copying file failed for ", oldpath)
+##                     warning("\n Copying file failed for ", oldpath)
+##                 }
+##             }
+##         }
+##         if(newf) {
+##             ## We need the extensions of all, included those not changed.
+##             exts <- vapply(filesp$files, getFileExtension, "a")
+##             newFileField <- createNewFileField(filesp$files, exts)
+##             newBibEntry <- bibentry
+##             ## If not last field, needs a comma
+##             if(filesp$filepos != (length(bibentry) - 1))
+##                 newFileField <- paste0(newFileField, ",")
+##             newBibEntry[filesp$filepos] <- newFileField
+##             return(newBibEntry)
+##         }
+##     }
+##     return(bibentry)
+## }
+
 fixFileNames <- function(bibfile, rootFileDir,
                          tmpFilePaths, ranletters = 8,
-                         maxlength = 20) {
+                         maxlength = 40) {
     ## Returns a new bibfile with file names "fixed"
     return(lapply(bibfile, function(x)
         fixFilesSingleEntry(x, rootFileDir, tmpFilePaths,
