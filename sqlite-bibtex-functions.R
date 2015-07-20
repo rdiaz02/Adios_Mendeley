@@ -286,6 +286,48 @@ newBibItems <- function(x) {
     return(out)
 }
 
+
+getAField <- function(x, field) {
+    return(grep(paste0("^", field, " = \\{"), x))
+}
+
+
+checkSameKeywordsMendtags <- function(x) {
+    kwd <- gsub("^keywords", "", x[getAField(x, "keywords")])
+    mt <- gsub("^mendeley-tags", "", x[getAField(x, "mendeley-tags")])
+    if(length(kwd) && length(mt)) {
+        if(kwd != mt) {
+            stop("Keyword != mendeley-tags in ", x[1])
+        }
+    }
+    if(length(mt) && !length(kwd))
+        stop("kwd no length in", x[1])
+}
+
+checkAnnoteInMendnote <- function(x) {
+    an <- gsub("^annote", "", x[getAField(x, "annote")])
+    mn <- gsub("^mendnotes", "", x[getAField(x, "mendnotes")])
+    if(length(an) && !length(mn)) {
+        stop("an but not mn in ", x[1])
+    }
+    if(length(an) && length(mn)) {
+        if(! (an %in% mn )) {
+            stop("annote not all in mendnote in ", x[1])
+        }
+    }
+}
+
+renameField <- function(x, oldname, newname) {
+    pos <- getAField(x, oldname)
+    x[pos] <- gsub(paste0("^", oldname, " = \\{"),
+                   paste0(newname, " = \\{"),
+                   x[pos])
+    return(x)
+}
+
+## more complicated, and do the right way:
+## parse by words (split by commas), create single list, and spit that out
+
 addInfoToBibEntry <- function(x, y) {
     ## x is the list entry
     ll <- length(x)
@@ -299,6 +341,12 @@ addInfoToBibEntry <- function(x, y) {
     newx <- c(x[1:(ll - 2)],
               newBibItems(lnew),
               x[c(ll-1, ll)])
+    checkSameKeywordsMendtags(newx)
+    checkAnnoteInMendnote(newx)
+    ## Remove redundant fields
+    newx <- newx[-getAField(newx, "mendeley-tags")]
+    newx <- newx[-getAField(newx, "annote")]
+    newx <- renameField(newx, "mendnotes", "annote")
     return(newx)
 }
 
