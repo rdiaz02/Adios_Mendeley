@@ -326,7 +326,7 @@ renameField <- function(x, oldname, newname) {
 }
 
 
-combineFields <- function(x, field1, field2) {
+combineFields <- function(x, field1, field2, tokenize) {
     ## place info of fields1 and field2 in a single field1, and remove
     ## field2
     pf1 <- getAField(x, field1)
@@ -341,11 +341,24 @@ combineFields <- function(x, field1, field2) {
     f2 <- gsub("\\}$", "", f2)
 
     if(!identical(f1, f2)) {
-        f1 <- c(f1, f2)        
-    } 
-    newx <- x[-pf2]
-    newx[pf1] <- paste0(field1, " = \\{", f1, "\\},")
-    return(newx)
+        if(!tokenize)
+            f1 <- paste0(f1, ".  ", f2)
+        else {
+            if(length(f1))
+                f1 <- strsplit(f1, ",")[[1]]
+            if(length(f2))
+                f2 <- strsplit(f2, ",")[[1]]
+            f1 <- paste(unique(f1, f2), collapse = ",")
+        }
+    }
+
+    if(length(pf1))
+        x[pf1] <- paste0(field1, " = \\{", f1, "\\},")
+    else if(length(pf2))
+        x[pf2] <- paste0(field1, " = \\{", f1, "\\},")
+    if(length(pf2) && length(pf1))
+        x <- x[-pf2]
+    return(x)
 }
 
 
@@ -365,8 +378,8 @@ addInfoToBibEntry <- function(x, y) {
     newx <- c(x[1:(ll - 2)],
               newBibItems(lnew),
               x[c(ll-1, ll)])
-    newx <- combineFields(newx, "annote", "mendnotes")
-    newx <- combineFields(newx, "keywords", "mendeley-tags")
+    newx <- combineFields(newx, "annote", "mendnotes", FALSE)
+    newx <- combineFields(newx, "keywords", "mendeley-tags", TRUE)
     ## checkSameKeywordsMendtags(newx)
     ## checkAnnoteInMendnote(newx)
     ## ## Remove redundant fields
