@@ -7,7 +7,7 @@ tmpFilePaths <- "/home/ramon/tmp/mend"
 
 source("sqlite-bibtex-functions.R")
 
-
+## Remember to empty the trash of mendeley
 con <- dbConnect(SQLite(), MendeleySQL)
 minimalDBchecks(con)
 
@@ -21,20 +21,19 @@ minimalDBDFchecks(res)
 
 
 
-bibfile <- myBibtexReader(BibTeXFile)
+bibfile <- myBibtexReaderandCheck(BibTeXFile)
 bibtexDBConsistencyCheck(res, bibfile)
 
 checkFileDirNesting(bibfile, rootFileDir, numdirs = 1)
 ## Continue if things are ok
 
 ## Add the extra information not exported by default by Mendeley
-bibfile <- addInfoToBibTex(bibfile, res)
+bibfile2 <- addInfoToBibTex(bibfile, res)
 
 ## Fix file names: nothing longer than 20 chars and no spaces in file names.
-bibfileFileFixed <- fixFileNames(bibfile)
+bibfileFileFixed <- fixFileNames(bibfile2, rootFileDir, tmpFilePaths)
 
 
-## FIXME: check bibkeys for no weird things like &, etc.
 
 jabrefGr <- jabrefGroups(con, res)
 ## If you want to see what it looks like
@@ -42,12 +41,8 @@ jabrefGr <- jabrefGroups(con, res)
 ##       jabrefGr)
 
 
-
-
 outFullBibTex(bibfileFileFixed, jabrefGr, out)
 
-## FIXME: fix the nesting of directories
-## - fix repeated entries
 ## - write the script to clean bibtex for tablet: entr project: http://entrproject.org/
 ## - hel-bibtex issues?
 

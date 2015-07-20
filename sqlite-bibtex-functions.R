@@ -183,15 +183,20 @@ eachFolderOut <- function(x, folderInfo = folderDocuments,
 getBibKey <- function(x) {
     bibk <- strsplit(strsplit(x, "{",
                               fixed = TRUE)[[1]][2], ",", fixed = TRUE)[[1]][1]
-    if(grepl(";", bibk)) {
+    if(grepl(";", bibk, fixed = TRUE)) {
         cat("You have a ';' in a bibtex key. Expect problems in jabref groups. ")
         cat("The offending entry is ", bibk, "\n")
         warning("You have a ';' in a bibtex key. Expect problems in jabref groups")
     }
+    if(grepl("[^a-zA-Z0-9:_-]", bibk)) {
+        cat("A character not in [a-zA-Z0-9:_-] in the bibkey.  ")
+        cat("Change it? The entry is ", bibk, "\n")
+        warning("A character not in [a-zA-Z0-9:_-] in the bibkey.  ")
+    }
     return(bibk)
 }
 
-myBibtexReader <- function(file) {
+myBibtexReaderandCheck <- function(file) {
     cat("\n Starting readLines for bibtex file\n")
     x <- readLines(con = file)
     cat("\n Done with  readLines for bibtex file\n")
@@ -313,7 +318,7 @@ addInfoToBibTex <- function(bib, db) {
     
     ll <- length(bib)
     for(i in seq.int(ll)) {
-        ll[[i]] <- addInfoToBibEntry(bib[[i]], db[i, ])
+        bib[[i]] <- addInfoToBibEntry(bib[[i]], db[i, ])
     }
     return(bib)
 }
@@ -368,6 +373,7 @@ innerCheckDirNesting <- function(x, i,  rootFileDir, num.dirs = 1) {
     if(num.dirs != numd) {
         cat("\n Here, at i = ", i, "\n")
         cat(y)
+        cat("and this is x ", x)
         warning("not expected number of directories. Fix before continuing")
         return(FALSE)
     } else {
@@ -468,7 +474,7 @@ fixFilesSingleEntry <- function(bibentry, rootFileDir,
             f1 <- justTheFile(filesp$files[nfile], rootFileDir)
             ## We must make sure the stupid spaces from directory names do
             ## not screw things up.
-            oldpath <- gsubTheCrap(ilesp$files[nfile])
+            oldpath <- gsubTheCrap(filesp$files[nfile])
             ## oldpath <- gsub(" ", "\\ ", filesp$files[nfile], fixed = TRUE)
             ## oldpath <- gsub("(", "\\(", oldpath, fixed = TRUE)
             ## oldpath <- gsub(")", "\\)", oldpath, fixed = TRUE)
@@ -529,30 +535,35 @@ fixFileNames <- function(bibfile, rootFileDir,
 
 
 
-## some examples
-bibfile[[1961]][]
+## ## some examples
+## bibfile[[1961]][]
 
-bibfile[[801]][5]
-bibfile[[1128]][4]
-bibfile[[255]][5]
-bibfile[[2205]][6] ## two levels of dir nesting
-
-
-
-minibib <- bibfile[c(2, 3, 801, 1128, 255, 1962)]
-minibib2 <- fixFileNames(minibib, rootFileDir, tmpFilePaths)
-outFullBibTex(minibib2, jabrefGr, out)
+## bibfile[[801]][5]
+## bibfile[[1128]][4]
+## bibfile[[255]][5]
+## bibfile[[2205]][6] ## two levels of dir nesting
 
 
-fixFilesSingleEntry(bibfile[[1]], rootFileDir, tmpFilePaths)
+
+## minibib <- bibfile[c(2, 3, 801, 1128, 255, 1962)]
+## minibib2 <- fixFileNames(minibib, rootFileDir, tmpFilePaths)
+## outFullBibTex(minibib2, jabrefGr, out)
+
+
+## fixFilesSingleEntry(bibfile[[1]], rootFileDir, tmpFilePaths)
+
+
+
+
+
 
 ## dbListTables(con)
 
 ## ## All the tables
-tables <- dbListTables(con)
-sapply(tables, function(x) dbListFields(con, x))
+## tables <- dbListTables(con)
+## sapply(tables, function(x) dbListFields(con, x))
 
-df <- dbReadTable(con, "Files")
+## df <- dbReadTable(con, "Files")
 
 
 ## Note that keywords are the same as mendeley-tags in bibtex
