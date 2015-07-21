@@ -101,3 +101,56 @@ try zotfile? just for pdf extraction
 
 using ruby pdf-reader and this gist
 https://gist.github.com/danlucraft/5277732
+
+
+
+
+citation key format
+[auth:fold:lower][Title:fold:nopunct:skipwords:select,1,1:lower:prefix,_][year:prefix,_][0]
+
+
+
+Pay attention to the not imported note
+"Better BibTeX coudl not import ..."
+
+
+
+Tablet:
+refMaster
+library
+erathostenes
+
+
+Relative paths
+https://github.com/ZotPlus/zotero-better-bibtex/issues/126
+
+
+
+helm and ebib and C-x C-f
+use a modified bib file, with sed taking care of things
+
+Using a tablet
+==============
+
+Here things are not as easy and nice as they were with
+[Referey](https://play.google.com/store/apps/details?id=com.kmk.Referey&hl=en). I
+have tried all of the apps listed in
+(https://www.zotero.org/support/mobile), including Zandy, Zed Lite, Zed
+beta, Zojo, and Zotfile. The main problem with the first four is that you
+cannot do something that to me is necessary: get the database file from
+whererever the app deams suitable, but take the PDFs (more generally,
+attached files) from a place I sync on my own. I do not store my attached
+files in Zotero's servers, but sync them on my own with
+[syncthing](https://syncthing.net/). Zotfile is nice, but not really what
+I need and I find it too complicated and requires too much manual
+intervention ---see the comments in my
+[web page entry](http://ligarto.org/rdiaz/Zotero-Mendeley-Tablet.html#sec-6-2).
+
+
+
+My setup up
+Zotero-data is where the sqlite lives. Not synced by syncthing
+
+Zotero-data/storage is a link to Zotero-storage
+
+Zotero-storage: synced by syncthing.
