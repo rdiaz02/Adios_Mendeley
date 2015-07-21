@@ -66,7 +66,12 @@ Notes and warnings
 Logic
 =====
 
-keywords are imported as tags.
+mendeley keywords and keywords are combined and then keywords are imported
+as tags in Zotero
+
+annote and mendnote (my own direct extraction from sqlite, to circumvent
+the bug in mendeley) are combined in annote, which is a note in Zotero
+
 
 Use bibitex from mend, and add fields and folders. Fields from sqlite,
 folders from sqlite plus some massaging. Restropectibvely, better to have
@@ -78,3 +83,21 @@ Todo
 ## - helm-bibtex issues?
 
 
+
+Not perfect: for instance, if you have latex code in the notes, it can
+break things.
+
+
+poppler not workig fior extracting highlights:
+http://coda.caseykuhlman.com/entries/2014/pdf-extract.html
+
+PDF extraction: for pdf.js as standalone:
+https://groups.google.com/forum/#!topic/mozilla.dev.pdf-js/cDZwsFS1kio
+
+try zotfile? just for pdf extraction
+
+
+
+
+using ruby pdf-reader and this gist
+https://gist.github.com/danlucraft/5277732

@@ -294,8 +294,12 @@ combineFields <- function(x, field1, field2, tokenize) {
     f2 <- gsub("\\}$", "", f2)
 
     if(!identical(f1, f2)) {
-        if(!tokenize)
-            f1 <- paste0(f1, ".  ", f2)
+        if(!tokenize) {
+            if(length(f1))
+                f1 <- paste0(f1, ".  ", f2)
+            else
+                f1 <- f2
+        }
         else {
             if(length(f1))
                 f1 <- strsplit(f1, ",")[[1]]
@@ -314,9 +318,20 @@ combineFields <- function(x, field1, field2, tokenize) {
     return(x)
 }
 
+fixAnnote <- function(x) {
+    ## The html and the #, etc It would be nicer to do it properly,
+    ## removing tags and html escape sequences.
+    pf1 <- getAField(x, "annote")
+    tmp <- gsub("&#039;", "\'", x[pf1])
+    tmp <- gsub("#", "\\\\#", tmp)
+    tmp <- gsub("<br/>", "\n ", tmp)
+    tmp <- gsub("&quot;", "\"", tmp)
+    x[pf1] <- tmp
+    return(x)
+}
 
-## more complicated, and do the right way:
-## parse by words (split by commas), create single list, and spit that out
+## Keywords are the author keywords. mendeley-tags are tags I
+## place. Sometimes they are identical, or there are no author keywords.
 
 addInfoToBibEntry <- function(x, y) {
     ## x is the list entry
@@ -332,6 +347,7 @@ addInfoToBibEntry <- function(x, y) {
               newBibItems(lnew),
               x[c(ll-1, ll)])
     newx <- combineFields(newx, "annote", "mendnotes", FALSE)
+    newx <- fixAnnote(newx)
     newx <- combineFields(newx, "keywords", "mendeley-tags", TRUE)
     ## checkSameKeywordsMendtags(newx)
     ## checkAnnoteInMendnote(newx)
@@ -341,6 +357,7 @@ addInfoToBibEntry <- function(x, y) {
     ## newx <- renameField(newx, "mendnotes", "annote")
     return(newx)
 }
+
 
 
 addInfoToBibTex <- function(bib, db) {
@@ -524,6 +541,8 @@ fixFileNames <- function(bibfile,
         fixFilesSingleEntry(x, tmpFilePaths,
                             ranletters, maxlength)))
 }
+
+
 
 
 ## Not used; these were an ugly kludge
