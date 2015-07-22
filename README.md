@@ -1,161 +1,346 @@
+# Adios Mendeley #
 
-Why move:
-- Does not check for duplicated bibtex citation keys and will not generate
-  bibtex entry if you do not have author, date entries. This sucks, as for
-  me the place I look for stuff is the bibtex file (much faster
-  searching).
+I have used the code here to move from Mendeley to Zotero. In this moving
+I haven't lost any of the Mendeley annotations for entries, the
+annotations of Mendeley in the PDFs themselves, Mendeley's folder
+structure (somewhat equivalent to Zotero's collections), or the date the
+reference is added.
 
-- Mendeley has cluttered interface, compared to zotero.
-- Zotero: much faster searches
-- My troubles: http://support.mendeley.com/customer/en/portal/questions/12997701-restore-from-a-local-backup?new=12997701
+A few other files here allow me to automatically extract annotations and
+highlights from PDFs (annotations and highlights in the PDF itself, not
+the ugly thing that Mendeley does when it annotates PDFs), as well as
+prepare the BibTeX file for easy usage with Emacs and with a tablet.
+
+
+
+## Using it ##
+
+Start R, make the needed changes in the first four variables defined in
+**mend-to-bibtex.R**, and run it, paying attention to possible errors and
+warnings. In particular:
+
+- Mendeley makes no provision to avoid repeated BibTeX keys. So go and fix
+  them: the run will give you the titles of the files with repeated keys.
+
+- Mendeley will not export a BibTeX entry if there is no BibTeX key. You
+  might have deleted the key, or if you set Mendeley to automatically
+  create keys, no key will be created if there is no author and no
+  title. Again, the program will tell you which entries have no key. 
+
+
+I have several checks in place for missing entries, mismatch in entries in
+the BibTeX file and the sqlite, etc.
+
+
+Once you have your new BibTeX file, before importing it into Zotero, open
+it up in [JabRef](http://jabref.sourceforge.net/). Why? Because there can
+be things that are not OK, like a keyword entry with newlines, or latex
+code itself in the notes, and this will break the import into Zotero
+(since this only happened to me in two entries, I did not change the code
+to catch and fix these issues).
+
+If you first go through JabRef first, you will find the problem very
+quickly and easily (as easy as being told about the problematic line
+number). Fix any remaining issues.
+
+When done import into Zotero (imports of large bibliographies can be slow,
+even more if you enable full PDF indexing ---I do the import first without
+PDF indexing, by changing the settings to 0 pages and 0 characters, and
+only after I have my full bibliography there I enable the indexing back).
+
+I've only imported into a Zotero that had Better BibTeX,
+[BBT](https://zotplus.github.io/better-bibtex/) as an extension. I am not
+sure, but this might add also some extra functionality in the import (it
+definitely does for the export of BibTeX and I find it absolutely
+essential).
+
+
+
+Finally, when you import in Zotero, pay attention to the "not imported"
+note you might see as one of your last references. In my case, two
+references that imported fine in JabRef did not in Zotero (weird
+characters in authors' names). You will see in the text of the note
+something like "Better BibTeX coudl not import ..."
+
+
+
+Enjoy! Mendeley is now just a bad dream of days gone by. :-)
+
+
+### Using it: what operating systems? ###
+
+I've only used this with GNU Linux. I guess it should work in other Unixes
+(Macs, for instance) but some things will definitely not work with Windows
+directly, and you'll need to modify the code.
+
+
+
+## What and how: details  ##
+
+I use both the BibTeX file exported from Mendeley and the sqlite
+database. The BibTeX file that Mendeley exports is missing many things
+that you probably want to keep, so I directly query the sqlite database,
+grab that info, and place it in a new BibTeX file. In the process, I fix a
+few major problems with things Mendeley does with files, etc.  Finally,
+from the sqlite file I also extract the folder structure, and I add that
+to the new BibTeX file using the format that
+[JabRef](http://jabref.sourceforge.net/) uses for groups. Since the Zotero
+import can use JabRef's groups' information (see
+[this ZotPlus closed issue](https://github.com/ZotPlus/zotero-better-bibtex/issues/97),
+you do not need to enter any of the folder/collection information by hand.
+
+
+These are the pieces of information I get from the Mendeley sqlite file
+(and some details of what is done):
+
+- Date the file was added (field `timestamp`).
+
+- Annotations in the entry. You might think you have these in the BibTeX
+  file, but you really don't: as of now ---2015-07---, with Mendeley's
+  v. 1.14 the exporter is buggy and you will not get the full annotations
+  in the entry if there are newlines; this is a know bug (search the
+  Mendeley forum). So I curcumvent the bug by grabbing all of the
+  annotations from the sqlite db (and include any that might have been
+  placed in the `annote` field and not be in the sqlite field `text` in
+  table `DocumentNotes` ---nope, I did not check if this happened at all;
+  I just took the safer way of using the union of both). These are all in
+  the `annote` field in the BibTeX file, and Zotero will recognize this as
+  notes.
+
+- Annotations in the PDFs made from within Mendeley. If you are naive
+  enough (as I was when I started using Mendeley) you might be using
+  Mendeley's PDF editor which does NOT place the annotations and
+  highlights in the PDF itself (this is easy to check if you open a
+  Mendeley-annotated file in any other pdf viewer). So I grab the PDF
+  annotations and place them in a new field in the BibTeX file that I call
+  `mendpfnotes`.
+
+- Keywords and tags. In Mendeley's dbs and BibTeX you get a `keywords` and
+  a `mendeley-tags` field. I think `keywords` often contain the author's
+  keywords, but not always, and one of the two can be missing or
+  overlapping the other. So I just spit out a single field (called
+  `keywords`), which is the union (after tokenizing by commas) of
+  `keywords` and `mendeley-tags`. This is happily recognized by Zotero as
+  tags.
+
+- The original Mendeley id, in case you need to go back to the sqlite
+  database (field `mendid`).
+
+
+### Some clean up operations ###
+
+
+I also do some cleaning up of strings, such as some of the HTML markup in
+the notes that will prevent proper import and/or make life harder when
+reading them (e.g., you want a newline if you have a `<br/>`).
+
+
+Another important clean up operation affects file names. Again, if you
+allow Mendeley to rename files for you (which was a silly thing I did
+sometime in the past) you will find that you end up with file names that
+can be really long and that contain spaces and other annoying
+characters. I fix this before importing into Zotero: any file with a name
+longer than a user-specified length (I used 40, but this is a function
+argument), or with spaces or characters that are not letters, numbers, the
+period or the hyphen, are renamed using as the new name the BibTeX key and
+a randomly generated sequence of letters and numbers (length of the random
+part is also a user-modifiable argument).
+
+
+I actually wonder why Mendeley can create such long file names. This seems
+like an obviously bad idea (I once tried to encrypt a home partition using
+eCryptfs or encfs, or both, and hit the maximum length possible, which is
+not difficult, given that Mendeley can also create horrendously long
+directory names).
+
+
+### Caveats and warnings ###
+
+- Getting the collections/folders. I've only used it with a set of folders
+  (Mendeley jargon) or collections (Zotero jargon) of up to two levels of
+  depth.  I think the code should work with arbitrarily deeply nested
+  structures, since the algorithms I wrote are fairly simple, but I have
+  not checked it.
+
+- If you have latex code in the notes, it can break things (it did for
+  me).
+
+- If you have keywords that contain things that get interpreted as
+  newlines, it can break things.
+
+
+
+### Why through BibTeX ###
+
+Initially, it looked like a good idea:
+
+- Because to me it is much simpler than trying to directly manipulate the
+  Zotero sqlite database.
+- You can incorporate loads of additional information, including the
+  Mendely folders the tags, etc.
+
+However, maybe I should not have used the originally exported Mendeley
+BibTeX file and modified it, but just directly create the BibTeX file from
+scratch from the sqlite info. 
+
+
+
+### Why R? ###
+
+The initial getting the info out of the Mendeley db involves just a couple
+of queries to the sqlite database which I do using the
+[RSQlite](https://github.com/rstats-db/RSQLite) package. The rest is
+massaging and cleaning, checking, modifying the bibtex, and preparing the
+JabRef group structure. I do it from R just because it is easier for me
+than using, say, Python.
+
+
+### Other ways of doing this ###
+
+Ideas and suggestions of how to go about moving from Mendeley to Zotero
+are available in Zotero's forum. For instance
+[this](https://forums.zotero.org/discussion/28786/mendeley-import/) and
+[this](https://forums.zotero.org/discussion/26453/moving-from-mendeley-to-zotero/). But
+most of the ideas still involve a fair amount of manual work. Alex
+Seeholzer has written a
+[Python script to move from Mendeley to Zotero](https://github.com/flinz/mendeley2zotero)
+but it did not fit my needs. (I run into trouble with dates, the
+folder/collection structure needs to be created before hand in Zotero, I
+think the PDF annotations do not get transferred, and I think you do not
+get the `annote` and `keywords` fields.)
+
+
+
+## Why move away from Mendeley? ##
+
+There are several good reasons:
+
+- Mendeley is not free software. It is not even open source.
+
+- It is not possible (or I have not been able to) just recover all of your
+  database from a backup you have yourself. I do not mean the backup that
+  Mendeley creates, I mean the backups you create by whatever reasonable
+  backup procedure you use, which creates copies at specific time points,
+  etc. If you have a decent backup policy of your machines and on day `t`
+  your db gets screwed up, you might think that it is just a matter of
+  going to your backup of `t - k`, and restore from there (maybe you are
+  lucky and `k` is less than a day old). Well, nope, it does not work that
+  way and there is no simple way to say "here, this is the database; use
+  this, and forget anything and everything in your servers"
+
+  With Zotero, in my limited tests, it does: in desperate cases you can
+  tell it to overwrite all the server stuff with your database (the
+  "Restore to Zotero servers"). And if you keep a backup of your BibTeX
+  files, you might also be able to restore most or even all of your stuff
+  from there (at least if you use
+  [BBT](https://zotplus.github.io/better-bibtex/) and export notes, etc).
+
+
+- Mendeley does not check for duplicated BibTeX citation keys and will not
+  generate a BibTeX entry if you do not have author and date entries. This
+  sucks, as for me the place I look for stuff is the BibTeX file (much
+  faster searching than via Mendeley itself).
+
+- Mendeley, in my opinion, has a cluttered interface, compared to Zotero.
+
+- Mendeley's searchers are slow. Zotero's are not blazing fast, but I find
+  them faster.
 
 - Sorting files into subfolders: who thought it was a good idea to use
-  spaces in the "folder" (directory) name?
+  spaces in the "folder" (directory) name? What about the file name itself?
 
 - In general, it is easy to shoot yourself in the foot.
 
-- Keyboard shortcuts: few, and where are they documented? Unavoidable to
-  use/abuse the mouse.
+- Keyboard shortcuts: few, and where are they documented? I find it
+  unavoidable to use/abuse the mouse (I often end up with wrist pain after
+  intensive bibliography work with Mendeley).
 
-- No BibTeX export if no author/year (i.e., no key)
+- Inflexible about what fields you are shown (some you cannot uncheck,
+  which sucks with long abstracts).
 
-- Inflexible what fields you are shown (some you cannot uncheck, which
-  sucks with long abstracts)
+- Persistent errors in entries, like adding links to files that you have
+  removed which results in the broken link in Mendeley and paths to
+  inexistent files in the BibTeX file.
 
-- Persisten errors in entries, like adding links to file that you
-  have removed which results in the broken link in mendeley and paths to
-  inexistent files in the bibtex file.
 
-- No export of bibtex entry if no key.
+### Why not before? ###
 
-- spaces and ' and & and ... in file and directory names.
+Because of the manual or programming work involved, I did not decide to
+take the plunge until a recent Mendeley crash that did not allow me to
+recover my library to a sane state. As well, I have been very happy with
+my usage of
+[Referey](https://play.google.com/store/apps/details?id=com.kmk.Referey&hl=en)
+to read my references in a tablet.
 
-- very long file and directory names.
 
+## Using a tablet ##
 
 
-Why through Bibtex:
-- Because you can incorporate loads of additional information, including
-  the Mendely folders the tags, etc.
-- Because to me it is much simpler than trying to directly manipulate the
-  Zotero sqlite database.
+Here things are not as easy and nice as they were with
+[Referey](https://play.google.com/store/apps/details?id=com.kmk.Referey&hl=en)
+and Mendeley. I have tried all of the apps listed in
+(https://www.zotero.org/support/mobile), including Zandy, Zed Lite, Zed
+beta, Zojo, Zotero Reader, and Zotfile. The main problem is that with none
+of them you cannot do something that to me is necessary: get the database
+file from whererever the app deams suitable, but take the PDFs (more
+generally, attached files) from a place I sync on my own. I do not store
+my attached files in Zotero's servers and I do not use Dropbox, but sync
+them with
+[syncthing](https://syncthing.net/). [Zotfile](http://zotfile.com/) is
+nice, but not really what I need and I find it too complicated and
+requires too much manual intervention ---see the comments in my
+[web page entry](http://ligarto.org/rdiaz/Zotero-Mendeley-Tablet.html#sec-6-2).
 
 
-Several pieces:
-- Get the tags, date added, etc from the Mendeley sqlite database. This is
-  basically just a little bit of sqlite code, but I call it from R using
-  RSQLite.
-- Get the information about the folders (Mendeley jargon), groups (JabRef
-  jargon), collections (Zotero jardon) from the Mendeley database and
-  produce output in a format compatible with JabRef, because the Zoter
-  importer of bibtex files understands JabRef's groups [zz](zz).
-  https://github.com/ZotPlus/zotero-better-bibtex/issues/97
+So what I am doing now is using Android applications that understand
+BibTeX files. There are three:
+[RefMaster](https://play.google.com/store/apps/details?id=me.bares.refmaster),
+[Library](https://play.google.com/store/apps/details?id=com.cgogolin.library),
+and
+[Erathostenes](https://play.google.com/store/apps/details?id=com.mm.eratos).
 
+Erathostenes should be able to understand one level of nesting in JabRef's
+groups, but it crashes on me when I use more (i.e., not that it does not
+display them, it crashes ---a bug I have reported). Moreover, Erathostenes
+takes a very long time to load my BibTeX file.
 
 
+RefMaster is nice (sorting by several fields) and in my experience faster
+than Erathostenes, but it does not support multiple files per entry (it is
+a "future feature", but this might take long to arrive, given that
+RefMaster's last version is from over two years ago).
 
+Library is much faster than the two above and supports multiple files and
+you can of course search the library. However, you cannot sort by date
+(this is a
+[requested feature](https://github.com/cgogolin/library/issues/1)).
 
 
-Notes and warnings
-==================
+Things, thus, are not as easy and simple as they were with Referey, and I
+do miss that. 
 
-- Collections/folders: tried it only with two levels. Should work with
-  more convoluted ones, since algorithms are fairly simple, but I have not
-  checked it.
 
 
+### How do I use it ###
 
+First, I only use the tablet to read and annotate the PDFs. I am not
+interested now in modifying the BibTeX file (or Zotero's db) itself. So
+this is just a matter of getting the BibTeX exported from Zotero into the
+tablet. I use [syncthing](https://syncthing.net/) for syncing the PDFs and other
+attachments and for syncing the BibTeX file.
 
+But what BibTeX file? Not the one immediately exported by Zotero, since
+that has stuff I do not need (the collections) and it is better to change
+the file paths. So I process Zotero's BibTeX with a little sed script that
+I run whenever Zotero produces a new BibTeX file. See all the details in
+[Automatically propagating changes in the database to helm and tablet](#Automatically-propagating-changes-in-the-database-to-helm-and-tablet).
 
 
-Logic
-=====
 
-mendeley keywords and keywords are combined and then keywords are imported
-as tags in Zotero
 
-annote and mendnote (my own direct extraction from sqlite, to circumvent
-the bug in mendeley) are combined in annote, which is a note in Zotero
+## Odds and ends ##
 
-
-Use bibitex from mend, and add fields and folders. Fields from sqlite,
-folders from sqlite plus some massaging. Restropectibvely, better to have
-forgotten about Mendeley bibtex and have generated my own.
-
-
-Todo
-## - write the script to clean bibtex for tablet: entr project: http://entrproject.org/
-## - helm-bibtex issues?
-
-
-
-Not perfect: for instance, if you have latex code in the notes, it can
-break things.
-
-
-poppler not workig fior extracting highlights:
-http://coda.caseykuhlman.com/entries/2014/pdf-extract.html
-
-PDF extraction: for pdf.js as standalone:
-https://groups.google.com/forum/#!topic/mozilla.dev.pdf-js/cDZwsFS1kio
-
-try zotfile? just for pdf extraction
-
-
-
-
-using ruby pdf-reader and this gist
-https://gist.github.com/danlucraft/5277732
-
-
-
-
-citation key format
-[auth:fold:lower][Title:fold:nopunct:skipwords:select,1,1:lower:prefix,_][year:prefix,_][0]
-
-
-
-Pay attention to the not imported note
-"Better BibTeX coudl not import ..."
-
-
-
-Tablet:
-refMaster
-library
-erathostenes
-
-
-Relative paths
-https://github.com/ZotPlus/zotero-better-bibtex/issues/126
-
-
-
-helm and ebib and C-x C-f
-use a modified bib file, with sed taking care of things
-
-
-
-## Automatically propagating changes in the database to helm and tablet ##
-Whenever there is a change in the Zotero database, the bibtex gets
-updated. Now, we want to have these changes propagate automagically to the
-tablet and the file I use with helm-bibtex, after creating appropriately
-modified files (for file paths and removing the jabref group structure,
-that we don¡t use for anything). This I do with the sed scripts
-**sed-helm-tablets.sh**.
-
-All that remains to be done is run the script when the bib file
-changes. We could do it with `inotifywatch` but using
-[entr](http://entrproject.org/) is much simpler. In my `.xsession` I have
-
-    ls ~/Zotero-data/storage/zotero-$HOSTNAME.bib | entr ~/Adios_Mendeley/sed-helm-tablets.sh &
-
-The reason why I have specific files per host is explained in the
-[Notes about using syncthing](#Notes-about-using-syncthing) section
-
-
-
-## Extracting all PDF annotations and placing them in an org-mode file ##
+### Extracting all PDF annotations and placing them in an org-mode file ###
 
 A very simple way, for me, to be able to quickly search all annotations in
 PDFs (and even highlights) is to extract the annotations and highlights,
@@ -166,32 +351,100 @@ I have a cron job that every night runs **leela-rub-extract.R** (simply a
 call to Rscript).
 
 I am using [Leela](https://github.com/TrilbyWhite/Leela) (see
-[my old web entry](http://ligarto.org/rdiaz/Zotero-Mendeley-Tablet.html#sec-9) for
-details) and also
-[this ruby script](https://gist.github.com/danlucraft/5277732) that uses
-[pdf reader](https://github.com/yob/pdf-reader). The ruby script will
-extract highlights too, whereas that is not working with Leela (or any
-other poppler-based approaches).
+[my old web entry](http://ligarto.org/rdiaz/Zotero-Mendeley-Tablet.html#sec-9)
+for details) and also
+[this ruby script by Dan Lucraft](https://gist.github.com/danlucraft/5277732)
+that uses [pdf reader](https://github.com/yob/pdf-reader). The ruby script
+will extract highlights too, whereas that is not working with Leela (or
+any other poppler-based approaches; that is my experience, but also at
+least the one of
+[Casey Kuhlman](http://coda.caseykuhlman.com/entries/2014/pdf-extract.html).
 
-[Zotfile](http://zotfile.com/) allows for similar things (or even better,
-depending on your point of view) but it requires manual triggering. With
-the approach I use, extraction takes place automatically.
+It seems that [pdf.js](https://mozilla.github.io/pdf.js/) is a very
+capable platform that extracts highlights and annotations, and that is in
+fact used by [Zotfile](http://zotfile.com/). But I have no idea if/how to
+run it from the command line as just a simple standalone, although
+[there are pointers out there](https://groups.google.com/forum/#!topic/mozilla.dev.pdf-js/cDZwsFS1kio).
 
 
-There is much room for improvement here:
+[Zotfile](http://zotfile.com/), a Zotero extension, allows for similar
+things (or even better, depending on your point of view) but it requires
+manual triggering. With the approach I use, extraction takes place
+automatically.
 
-- Trigger the extraction only for the PDF that is modified
+
+There is much room for improvement here, though:
+
+- Trigger the extraction only for the PDF that is modified (and neatly
+  insert the annotation in the proper place).
 - Create a file in a way that [helm bibtex](https://github.com/tmalsburg/helm-bibtex) will understand (when the
   [version of helm-bibtex that uses a single notes file is ready](https://github.com/tmalsburg/helm-bibtex/issues/40).
 
 
-## Notes about using syncthing ##
+
+### Using the BibTeX file from Emacs ###
+
+After seeing in the org mode list, I've started using the really great
+[helm-bibtex](https://github.com/tmalsburg/helm-bibtex), a bibliography
+manager for Emacs. Searching for stuff and inserting references is
+amazingly simple. However, I am not using `helm-bibtex-find-pdf` since I
+often have multiple PDFs associated with one entry. (I also have other
+issues, such as how the path is specified, but these could be fixed with
+the tipos that Titus von der Malsbrug give me
+[here](https://github.com/tmalsburg/helm-bibtex/issues/53)).
+
+
+What I do, if I want access to the PDF, is open the entry I want from
+helm-bibtex and then go the the `file` field, and `C-x C-f`
+to open the file (I am using
+[ffap](http://www.gnu.org/software/emacs/manual/html_node/emacs/FFAP.html),
+so `C-x C-f` on top of the file path immediately opens it). I am now using
+[pdf-tools](https://github.com/politza/pdf-tools), but it would work the
+same with Okular.
+
+For that to work, I generate, from the Zotero BibTeX file, a bib file with
+the file paths stripped of extraneous information, so that the file field
+contains only file paths. This is done with the script
+**sed-helm-tablets.sh**, and further details are provided in
+[Automatically propagating changes in the database to helm and tablet](#Automatically-propagating-changes-in-the-database-to-helm-and-tablet).
+
+
+### Automatically propagating changes in the database to helm and tablet ###
+
+Whenever there is a change in the Zotero database, the BiBTeX file gets
+updated (this is something you configure in Zotero, and I have it so that
+each machine running Zotero writes its own `zotero-$HOSTNAME.bib`
+file). But we want to modify this file, so it is easier to use in the
+tablets and with Emacs. We want BiBTeX files without the JabRef group
+structure and with easier to use file paths (easier to open from Emacs and
+the tablets). This I do with the sed scripts **sed-helm-tablets.sh**.
+
+
+Since we want to have these changes propagate automagically to the tablet
+and the file I use with helm-bibtex, all that remains to be done is run
+the script when the BibTeX file changes. We could do it with
+`inotifywatch` but using [entr](http://entrproject.org/) is much
+simpler. So that I do not need to remember to launch it manually, in my
+`.xsession` I have
+
+    ls ~/Zotero-data/storage/zotero-$HOSTNAME.bib | entr ~/Adios_Mendeley/sed-helm-tablets.sh &
+
+The reason why I have specific files per host is explained in the
+[Notes about using syncthing](#Notes-about-using-syncthing) section
+
+
+
+
+### Notes about using syncthing ###
 
 I use [syncthing](https://syncthing.net/) for syncing the PDFs and other
-attachments.
-
-First, you most likely do not want to sync the sqlite files themselves via
-syncthing (read the Zotero docs).
+attachments. Of course, beware that you most likely do not want to sync
+the sqlite files themselves via syncthing (read the Zotero docs and
+forum). My actual directory structure is to keep the Zotero db under
+`~/Zotero-data` and have the `storage` subdirectory be a symbolic link to
+`Zotero-storage`. All the attachments and the BibTeX files live under
+`Zotero-storage` and that gets synced (except for the files mentioned
+below and the machine-specific BibTeX files).
 
 Why do I have different bib files in different computers? The bib file is
 exported, from Zotero, to the storage directory, but since any change in
@@ -218,53 +471,13 @@ probably of little use).
 
 
 
-Using a tablet
-==============
 
-Here things are not as easy and nice as they were with
-[Referey](https://play.google.com/store/apps/details?id=com.kmk.Referey&hl=en). I
-have tried all of the apps listed in
-(https://www.zotero.org/support/mobile), including Zandy, Zed Lite, Zed
-beta, Zojo, and Zotfile. The main problem with the first four is that you
-cannot do something that to me is necessary: get the database file from
-whererever the app deams suitable, but take the PDFs (more generally,
-attached files) from a place I sync on my own. I do not store my attached
-files in Zotero's servers, but sync them on my own with
-[syncthing](https://syncthing.net/). Zotfile is nice, but not really what
-I need and I find it too complicated and requires too much manual
-intervention ---see the comments in my
-[web page entry](http://ligarto.org/rdiaz/Zotero-Mendeley-Tablet.html#sec-6-2).
+## License ##
+
+All the code here is copyright, 2015, Ramon Diaz-Uriarte, and is licensed
+under the [GNU Affero GPL Version 3 License](http://www.gnu.org/licenses/agpl-3.0.en.html).
 
 
-
-My setup up
-Zotero-data is where the sqlite lives. Not synced by syncthing
-
-Zotero-data/storage is a link to Zotero-storage
-
-Zotero-storage: synced by syncthing.
-
-
-
-For syncthing: exclude Zotero-Bufo.bib and Zotero-coleonyx.bib
-
-
-RefMaster: does not support multiple files. It is a future feature as
-shown in
-
-
-https://play.google.com/store/apps/details?id=me.bares.refmaster
-
-
-
-Erathostenes: slow, very slow, but you can open multiple files
-
-Library: can open multiple files, and much faster than erathostenes. Can
-use smae file as refmaster, and in setup path conversion, add the
-appropriate prefix (like is done in tablet-erathostenes)
-
-Problem of library is that you can search by name, etc, but not sort
-easily as with RefMaster
 
 
 <!---
