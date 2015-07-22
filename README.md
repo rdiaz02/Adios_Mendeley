@@ -1,5 +1,4 @@
 
-
 Why move:
 - Does not check for duplicated bibtex citation keys and will not generate
   bibtex entry if you do not have author, date entries. This sucks, as for
@@ -54,12 +53,18 @@ Several pieces:
 
 
 
+
+
+
 Notes and warnings
 ==================
 
 - Collections/folders: tried it only with two levels. Should work with
   more convoluted ones, since algorithms are fairly simple, but I have not
   checked it.
+
+
+
 
 
 
@@ -129,6 +134,23 @@ https://github.com/ZotPlus/zotero-better-bibtex/issues/126
 helm and ebib and C-x C-f
 use a modified bib file, with sed taking care of things
 
+
+
+## Automatically propagating changes in the database to helm and tablet ##
+Whenever there is a change in the Zotero database, the bibtex gets
+updated. Now, we want to have these changes propagate automagically to the
+tablet and the file I use with helm-bibtex, after creating appropriately
+modified files (for file paths and removing the jabref group structure,
+that we don¡t use for anything). This I do with the sed scripts
+**sed-helm-tablets.sh**.
+
+All that remains to be done is run the script when the bib file
+changes. We could do it with `inotifywatch` but using
+[entr](http://entrproject.org/) is much simpler. In my `.xsession` I have
+
+    ls ~/Zotero-data/storage/zotero-$HOSTNAME.bib | entr ~/Adios_Mendeley/sed-helm-tablets.sh &
+
+
 Using a tablet
 ==============
 
@@ -154,3 +176,31 @@ Zotero-data is where the sqlite lives. Not synced by syncthing
 Zotero-data/storage is a link to Zotero-storage
 
 Zotero-storage: synced by syncthing.
+
+
+
+For syncthing: exclude Zotero-Bufo.bib and Zotero-coleonyx.bib
+
+
+RefMaster: does not support multiple files. It is a future feature as
+shown in
+
+
+https://play.google.com/store/apps/details?id=me.bares.refmaster
+
+
+
+Erathostenes: slow, very slow, but you can open multiple files
+
+Library: can open multiple files, and much faster than erathostenes. Can
+use smae file as refmaster, and in setup path conversion, add the
+appropriate prefix (like is done in tablet-erathostenes)
+
+Problem of library is that you can search by name, etc, but not sort
+easily as with RefMaster
+
+
+<!---
+Local Variables:
+mode: gfm
+--->
