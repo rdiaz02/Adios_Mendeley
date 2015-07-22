@@ -150,6 +150,73 @@ changes. We could do it with `inotifywatch` but using
 
     ls ~/Zotero-data/storage/zotero-$HOSTNAME.bib | entr ~/Adios_Mendeley/sed-helm-tablets.sh &
 
+The reason why I have specific files per host is explained in the
+[Notes about using syncthing](#Notes-about-using-syncthing) section
+
+
+
+## Extracting all PDF annotations and placing them in an org-mode file ##
+
+A very simple way, for me, to be able to quickly search all annotations in
+PDFs (and even highlights) is to extract the annotations and highlights,
+and place them in an [org mode](http://orgmode.org/) file, where the
+heading is an org mode link to the file and for each file I have all the
+comments and highlights. Then, I can easily search from them. To do that,
+I have a cron job that every night runs **leela-rub-extract.R** (simply a
+call to Rscript).
+
+I am using [Leela](https://github.com/TrilbyWhite/Leela) (see
+[my old web entry](http://ligarto.org/rdiaz/Zotero-Mendeley-Tablet.html#sec-9) for
+details) and also
+[this ruby script](https://gist.github.com/danlucraft/5277732) that uses
+[pdf reader](https://github.com/yob/pdf-reader). The ruby script will
+extract highlights too, whereas that is not working with Leela (or any
+other poppler-based approaches).
+
+[Zotfile](http://zotfile.com/) allows for similar things (or even better,
+depending on your point of view) but it requires manual triggering. With
+the approach I use, extraction takes place automatically.
+
+
+There is much room for improvement here:
+
+- Trigger the extraction only for the PDF that is modified
+- Create a file in a way that [helm bibtex](https://github.com/tmalsburg/helm-bibtex) will understand (when the
+  [version of helm-bibtex that uses a single notes file is ready](https://github.com/tmalsburg/helm-bibtex/issues/40).
+
+
+## Notes about using syncthing ##
+
+I use [syncthing](https://syncthing.net/) for syncing the PDFs and other
+attachments.
+
+First, you most likely do not want to sync the sqlite files themselves via
+syncthing (read the Zotero docs).
+
+Why do I have different bib files in different computers? The bib file is
+exported, from Zotero, to the storage directory, but since any change in
+the bib file triggers a change in the helm and tablet bib files, I do not
+want to have this triggered in all the computers almost simultaneously if
+they are online as this could lead to conflicts via syncthing (the helm
+and tablet bibs being changed about the same time in all online
+machines). By keeping different Zotero bib files per machine, the bib in
+the machine I am working might change, and the changes in the helm and
+tablet bib will only appear in the machine I am working, and then be
+propagated to the other machines without leading to conflicts.
+
+
+If you use
+[PDF full text indexing](https://www.zotero.org/support/pdf_fulltext_indexing),
+in the storage directory you might want to add an `.stignore` file as
+follows:
+
+    .zotero-ft-cache
+    .zotero-ft-info
+
+to prevent the indexes from being sent to the tablet (where they are
+probably of little use).
+
+
 
 Using a tablet
 ==============
