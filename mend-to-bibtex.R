@@ -32,7 +32,6 @@
 MendeleySQL <- "mend.sqlite"
 BibTeXFile <- "library-fixed.bib"
 out <- "new-library.bib" ## the new bibtex file that will be created
-## rootFileDir <- "/home/ramon/Mendeley-pdfs" ## The Mendeley pdfs hang from here.
 tmpFilePaths <- "/home/ramon/tmp/mend" ## A temporary directory for
                                        ## placing renamed files.
 
@@ -73,6 +72,8 @@ outFullBibTex(bibfileFileFixed, jabrefGr, out)
 ## that into Zotero. You might want to first import into JabRef and see
 ## what happens.
 
+## After imported OK into Zotero, you might want to fix the dates. See
+## general instructions in README.md.
 
 
 
