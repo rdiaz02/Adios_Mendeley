@@ -421,7 +421,9 @@ justTheFile <- function(x) {
 
 newFname <- function(bibtexkey, oldfilename, tmpdir, ranletters) {
     extension <- getFileExtension(oldfilename)
-    nn <- paste0(bibtexkey, "-",
+    ## For the "citeulike:[0-9]" that creates funny named files.
+    fixedkey <- gsub(":", "", bibtexkey, fixed = TRUE)
+    nn <- paste0(fixedkey, "-",
                  paste(paste(sample(letters, ranletters,
                                     replace = TRUE)),
                        collapse = ""))
@@ -436,7 +438,8 @@ createNewFileField <- function(files, extensions) {
     if(length(files) != length(extensions))
         stop("lengths file != extensions")
     head <- "file = {"
-    fs <- paste0(":", files)
+    fnopath <- vapply(files, justTheFile, "a")
+    fs <- paste0(fnopath, ":", files)
     exts <- paste0(":", extensions)
     allfiles <- paste0(paste0(fs, exts), collapse = ";")
     return(paste0(head, allfiles, "}"))
