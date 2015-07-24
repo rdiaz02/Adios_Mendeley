@@ -69,11 +69,6 @@ jabrefGr <- jabrefGroups(con, res)
 
 outFullBibTex(bibfileFileFixed, jabrefGr, out)
 
-## ## I should have caught this during the processing, but just a few and
-## ## interspersed.
-
-## system(paste0("sed -i ", shQuote("s/&#039;/'/g"), " ", out))
-
 ## You should have the bibtex file in the one you called out.  Go import
 ## that into Zotero. You might want to first import into JabRef and see
 ## what happens.

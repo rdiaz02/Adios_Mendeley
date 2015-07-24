@@ -621,26 +621,6 @@ fixFileNames <- function(bibfile,
 
 
 
-## ## some examples
-## bibfile[[1961]][]
-
-## bibfile[[801]][5]
-## bibfile[[1128]][4]
-## bibfile[[255]][5]
-## bibfile[[2205]][6] ## two levels of dir nesting
-
-
-
-## minibib <- bibfile[c(2, 3, 801, 1128, 255, 1962)]
-## minibib2 <- fixFileNames(minibib, rootFileDir, tmpFilePaths)
-## outFullBibTex(minibib2, jabrefGr, out)
-
-
-## fixFilesSingleEntry(bibfile[[1]], rootFileDir, tmpFilePaths)
-
-
-## dbListTables(con)
-
 ## ## All the tables
 ## tables <- dbListTables(con)
 ## sapply(tables, function(x) dbListFields(con, x))
@@ -651,31 +631,7 @@ fixFileNames <- function(bibfile,
 ## - exporting from Mendeley the folders
 ##     - It is in the DocumentFolders and DocumentFoldersBase (for names)
 
-
 ## Note that keywords are the same as mendeley-tags in bibtex
-
-## ## some initial checks:
-## dd <- dbReadTable(con, "Documents")
-## nE <- nrow(dd)
-## if(length(unique(dd$id)) != nE)
-##     stop("Eh? multiple entries for same document?")
-
-## if(length(unique(dd$citationKey)) != nE) {
-##     warning("Repeated bibtex entries")
-##     which(duplicated(dd$citationKey))
-## }
-
-## if(any(is.na(dd$citationKey))) {
-##     warning("NA in bibtex entries")
-##     which(is.na(dd$citationKey))
-## }
-## dn <-  dbReadTable(con, "DocumentNotes")
-## nE <- nrow(dn)
-## if(length(unique(dn$documentId)) != nE)
-##     stop("Eh? multiple entries for same document in notes?")
-
-
-
 
 ## Miscell stuff
 ## Notes in the PDF
@@ -691,22 +647,13 @@ fixFileNames <- function(bibfile,
 
 ## dbListFields(con, "Documents")
 
-
-
 ## dd <- dbReadTable(con, "Documents")
-
-
-
 
 ## library(RefManageR)
 ## library(bibtex)
 
-
-
 ## bibfile <- read.bib(file = BibTeXFile) ## Nope: ignores incomplete entries
 ## bibfile <- ReadBib(file = BibTeXFile, check = FALSE): Drops fields I care about
-
-
 
 ## df1 <- dbReadTable(con, "DocumentFolders")[, -3] ## remove "status" column
 ## df2 <- dbReadTable(con, "DocumentFoldersBase")
@@ -740,8 +687,6 @@ fixFileNames <- function(bibfile,
 ##     if(all(formerDepth == folderNames$depth))
 ##         changesDepth <- FALSE
 ## }
-
-
 
 
 ## folderNames$depth <- computeFolderDepth(folderNames)
