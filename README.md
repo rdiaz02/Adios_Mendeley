@@ -3,7 +3,8 @@
 *Move from Mendeley to Zotero preserving notes, dates,
  folders/collections, and PDF annotations.*
 
-I have used the code here to move from Mendeley to Zotero. In this moving
+I have used the code here (and code from
+https://github.com/flinz/mendeley2zotero) to move from Mendeley to Zotero. In this moving
 I haven't lost any of the Mendeley annotations for entries, the
 annotations of Mendeley in the PDFs themselves, Mendeley's folder
 structure (somewhat equivalent to Zotero's collections), or the date the
@@ -64,6 +65,21 @@ they are just a few, and add them by themselves (possibly adding them to
 their corresponding collections), or fix the entries in the complete
 BibTeX and go back to step 3.
 
+5. Fix the dates. My
+[naive expectation](https://forums.zotero.org/discussion/50759) that the
+timestamp field would be recognized does not work. But you can use Alex
+Seeholzer's [mendeley2zotero](https://github.com/flinz/mendeley2zotero).
+	1. Make a backup copy of your databases.
+	2. Modify the script to have line `d_added =
+	datetime.datetime.utcfromtimestamp(d_added)` be `d_added =
+	datetime.datetime.utcfromtimestamp(d_added/1000)` (at least as of July
+	2015 Mendeley is using time in miliseconds since 1970).  (This might have been fixed by
+	the time you read this, since I filed an [issue](https://github.com/flinz/mendeley2zotero/issues/2)).
+	3. Run the script with the `added_dates` option. You might get some warnings that, as far as I can
+	tell, are inoquous.
+	4. Copy the zot.sqlite as the new zotero.sqlite, start Zotero, and
+       check.
+
 
 
 Enjoy! Mendeley is now just a bad dream of days gone by. :-)
@@ -96,7 +112,8 @@ These are the pieces of information I get from the Mendeley sqlite file
 (and some details of what is done and where they are left in the BibTeX
 file):
 
-- Date the file was added (field `timestamp`).
+- Date the file was added (field `timestamp`). But note this is not
+  directly incorporated into Zotero (see step 5 in [Using it](#Using-it)).
 
 - Annotations in the entry. You might think you have these in the BibTeX
   file, but maybe you don't: as of July 2015, with Mendeley's v. 1.14 the
@@ -164,12 +181,18 @@ directory names).
   depth.  I think the code should work with arbitrarily deeply nested
   structures, since the algorithms I wrote are fairly simple, but I have
   not checked it.
-
 - If you have latex code in the notes, it can break things (it did for
   me) during the import.
-
 - If you have keywords that contain things that get interpreted as
-  newlines in the BibTeX text file, it can break things during the import.
+newlines in the BibTeX text file, it can break things during the import.
+- I have noticed that some of my lower-level collections have been
+  duplicated as upper level. I think this is a different issue that
+  appeared later as I did something wrong. But check it. (I say this
+  because JabRef does not show any problems). Anyway, this should be a
+  matter of removing the duplicated upper-level collection (**not the
+  collection and items**).
+
+
 
 
 
@@ -207,10 +230,11 @@ are available in Zotero's forum. For instance
 most of the ideas still involve a fair amount of manual work. Alex
 Seeholzer has written a
 [Python script to move from Mendeley to Zotero](https://github.com/flinz/mendeley2zotero)
-but it did not fit my needs. (I run into trouble with dates, the
-folder/collection structure needs to be created before hand in Zotero, I
-think the PDF annotations by Mendeley do not get transferred, and I think
-you might not get the full `annote` and `keywords` fields.)
+but it did not fully fit my needs; in particular, the folder/collection
+structure needs to be created before hand in Zotero, I think the PDF
+annotations by Mendeley do not get transferred, and I think you might not
+get the full `annote` and `keywords` fields. As you have seen, though, I
+use it for fixing the dates (see step 5 in [Using it](#Using-it)).
 
 
 
@@ -425,6 +449,16 @@ contains only file paths. This is done with the script
 **sed-helm-tablets.sh**, and further details are provided in
 [Automatically propagating changes in the database to helm and tablet](#Automatically-propagating-changes-in-the-database-to-helm-and-tablet).
 
+
+**Beware** that because of the way BBT works, if you want to preserve the
+  full path, you might not want to export to a bib file that lives right in
+  your data directory. See
+  [this thread](https://github.com/ZotPlus/zotero-better-bibtex/issues/126). (So,
+  in my case, I export directly to
+  `~/Zotero-storage/zotero-$HOSTNAME.bib`, not to
+  `~/Zotero-data/storage/zotero-$HOSTNAME.bib`). You mileage might vary
+  and, regardless, this would be an issue of modifying the sed script to
+  your needs.
 
 ### Automatically propagating changes in the database to helm and tablet ###
 
