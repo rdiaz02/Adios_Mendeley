@@ -105,7 +105,9 @@ to the new BibTeX file using the format that
 [JabRef](http://jabref.sourceforge.net/) uses for groups. Since the Zotero
 import can use JabRef's groups' information (see
 [this ZotPlus closed issue](https://github.com/ZotPlus/zotero-better-bibtex/issues/97)),
-you do not need to enter any of the folder/collection information by hand.
+you do not need to enter any of the folder/collection information by
+hand. The functions for doing all of this are defined in
+**sqlite-bibtex-functions.R**. 
 
 
 These are the pieces of information I get from the Mendeley sqlite file
