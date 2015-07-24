@@ -349,12 +349,6 @@ addInfoToBibEntry <- function(x, y) {
     newx <- combineFields(newx, "annote", "mendnotes", FALSE)
     newx <- fixAnnote(newx)
     newx <- combineFields(newx, "keywords", "mendeley-tags", TRUE)
-    ## checkSameKeywordsMendtags(newx)
-    ## checkAnnoteInMendnote(newx)
-    ## ## Remove redundant fields
-    ## newx <- newx[-getAField(newx, "mendeley-tags")]
-    ## newx <- newx[-getAField(newx, "annote")]
-    ## newx <- renameField(newx, "mendnotes", "annote")
     return(newx)
 }
 
@@ -482,10 +476,6 @@ fixFilesSingleEntry <- function(bibentry,
 
     if(!is.null(filesp$files)) {
         newf <- FALSE
-        ## trouble for creating new files
-        ## tmpdir <- paste0(tmpFilePaths, "/",
-        ##                  paste(sample(letters, 8, replace = TRUE),
-        ##                        collapse = ""))
         tmpdir <- tmpFilePaths
         for(nfile in seq_along(filesp$files)) {
             f1 <- justTheFile(filesp$files[nfile])
@@ -510,8 +500,6 @@ fixFilesSingleEntry <- function(bibentry,
                 ## whole spaces thing really sucks.
                 cmd <- system(paste("cp", shQuote(oldpath), 
                        filesp$files[nfile]), intern = FALSE)
-                ## cmd <- system(paste("cp ", oldpath, " ",
-                ##                     filesp$files[nfile]), intern = FALSE)
                 if(cmd) {
                     cat("\n Copying file failed for ", oldpath)
                     warning("\n Copying file failed for ", oldpath)
@@ -543,6 +531,12 @@ fixFileNames <- function(bibfile,
 }
 
 
+######################################################################
+######################################################################
+######################################################################
+######################################################################
+
+######      Old stuff no longer used.
 
 
 ## Not used; these were an ugly kludge
