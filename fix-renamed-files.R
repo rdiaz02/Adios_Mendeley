@@ -1,3 +1,7 @@
+## This probably is only of interest to me. Left here for the sake of
+## historical record.
+
+
 ## So a whole bunch (291) of files were renamed, with either file names or
 ## path names shortened. No idea why or by whom. I suspect of Mendeley,
 ## but cannot say for sure.
