@@ -475,10 +475,10 @@ fixFilesSingleEntry <- function(bibentry,
     bibkey <- getBibKey(bibentry[1])
 
     filesp <- getFilesBib(bibentry)
-    newf <- FALSE
+    ## newf <- FALSE
 
     if(!is.null(filesp$files)) {
-        newf <- FALSE
+        ## newf <- FALSE
         tmpdir <- tmpFilePaths
         for(nfile in seq_along(filesp$files)) {
             f1 <- justTheFile(filesp$files[nfile])
@@ -509,17 +509,21 @@ fixFilesSingleEntry <- function(bibentry,
                 }
             } 
         }
-        if(newf) {
-            ## We need the extensions of all, included those not changed.
-            exts <- vapply(filesp$files, getFileExtension, "a")
-            newFileField <- createNewFileField(filesp$files, exts)
-            newBibEntry <- bibentry
-            ## If not last field, needs a comma
-            if(filesp$filepos != (length(bibentry) - 1))
-                newFileField <- paste0(newFileField, ",")
-            newBibEntry[filesp$filepos] <- newFileField
-            return(newBibEntry)
-        }
+        ## if(newf) {
+        
+        ## We ALWAYS do this, to avoid the meaningless
+        ## "Attachment" name that is given to the attachments.
+
+        ## We need the extensions of all, included those not changed.
+        exts <- vapply(filesp$files, getFileExtension, "a")
+        newFileField <- createNewFileField(filesp$files, exts)
+        newBibEntry <- bibentry
+        ## If not last field, needs a comma
+        if(filesp$filepos != (length(bibentry) - 1))
+            newFileField <- paste0(newFileField, ",")
+        newBibEntry[filesp$filepos] <- newFileField
+        return(newBibEntry)
+        ##       }
     }
     return(bibentry)
 }
