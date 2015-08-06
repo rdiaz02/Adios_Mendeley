@@ -433,7 +433,7 @@ references in something you are writing is amazingly simple and
 powerful. However, I am not using `helm-bibtex-find-pdf` since I often
 have multiple PDFs associated with one entry. (I also have other issues,
 such as how the path is specified, but these could be fixed with the hints
-that Titus von der Malsbrug gave me
+that Titus von der Malsburg gave me
 [here](https://github.com/tmalsburg/helm-bibtex/issues/53)).
 
 
