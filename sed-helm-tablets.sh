@@ -15,10 +15,24 @@ sed -e '/file = {/{
 
 ##  Erathostenes had a bug and crashed with groups. Is it fixed now? We
 ##  keep them for now. Note that Erathostenes can use paths without the
-##  exact jabref format.
+##  exact jabref format. For info about paths see this issue:
+##  https://bitbucket.org/mkmatlock/eratosthenes/issues/206/attachment-location
+##  so it seems we want to remove all the path, except what hangs from the common
+##  location of bib and files.
+
+# sed -e '/file = {/{
+#      s/\/home\/ramon\/Zotero-data\/storage//g 
+# }' $ZOTDIR/helm.bib > $ZOTDIR/tablet-erathostenes.bib
+
+
+# sed -e '/file = {/{
+#     s/\/home\/ramon\/Zotero-data\/storage/\/sdcard\/Zotero-storage/g 
+# }' $ZOTDIR/helm.bib > $ZOTDIR/tablet-erathostenes.bib
+
+# This is a larger file. Not sure I want all the extra stuff.
 sed -e '/file = {/{
-    s/\/home\/ramon\/Zotero-data\/storage/\/sdcard\/Zotero-storage/g 
-}' $ZOTDIR/helm.bib > $ZOTDIR/tablet-erathostenes.bib
+    s/\/home\/ramon\/Zotero-data\/storage//g 
+}' $ZOTDIR/zotero-$HOSTNAME.bib > $ZOTDIR/tablet-erathostenes.bib
 
 
 ## For helm we do not need the jabref group structure
