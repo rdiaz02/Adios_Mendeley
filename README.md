@@ -445,6 +445,26 @@ so `C-x C-f` on top of the file path opens it). I am now using
 [pdf-tools](https://github.com/politza/pdf-tools) to view the PDFs from
 within Emacs, but it would work the same with Okular or another viewer.
 
+
+In fact, it is very simple to have helm-bibtex jump to the file field
+directly as the default action (and, once in there, if you have multiple
+files, moving between them is simple with `forward-sexp`). I have this in
+my `.emacs`:
+
+    (defun rdu-helm-bibtex-go-to-file-field (KEY)
+      "Jump to the file field in the entry."
+      (helm-bibtex-show-entry KEY)
+      (search-forward "file = { ")
+    )
+    
+    (helm-add-action-to-source "Go to file field" 'rdu-helm-bibtex-go-to-file-field
+    			   helm-source-bibtex 0)
+    (helm-delete-action-from-source "Show entry" helm-source-bibtex)
+    (helm-add-action-to-source "Show entry" 'helm-bibtex-show-entry
+    			   helm-source-bibtex 1)
+
+
+
 For that to work, I generate, from the Zotero BibTeX file, a bib file with
 the file paths stripped of extraneous information, so that the file field
 contains only file paths. This is done with the script
