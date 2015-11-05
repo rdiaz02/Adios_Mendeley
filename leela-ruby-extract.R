@@ -23,10 +23,22 @@ leela_anot <- sapply(list.of.pdfs, function(x) {
     return(c(a0, a, b))
 })
 
+write(file = "anot-leela.txt", unlist(leela_anot))
+
+## remove more stuff, as I find it, or become annoyed by it
+system("egrep -v '^<[0-9]+,[0-9]+:link>$' anot-leela.txt \\
+        | egrep -v '^<[0-9]+,[0-9]+:highlight>$' \\
+        | egrep -v '^<[0-9]+,[0-9]+:widget>Citation Link$' \\
+        |  egrep -v '^<[0-9]+,[0-9]+:underline>$' >  \\
+        ~/Zotero-data/storage/leela-annotations-in-PDFs-of-refs.org")
+## It would be nice to remove those PDFs without any annotations. Some other time.
+
+
 setwd(pdfextractPath)
 
-## This is BAD! Calling this with each file. But I know no ruby. And this
-## is extremely slow
+## This is BAD! Calling this with each file. And this is extremely
+## slow. But I know no ruby.
+
 if(runRubyExtract){
  pdfe_anot <- sapply(list.of.pdfs, function(x) {
     a0 <- ""
@@ -37,18 +49,7 @@ if(runRubyExtract){
  } )
 }
 
-
 setwd("~/tmp")
-
-write(file = "anot-leela.txt", unlist(leela_anot))
-
-## remove more stuff, as I find it, or become annoyed by it
-system("egrep -v '^<[0-9]+,[0-9]+:link>$' anot-leela.txt \\
-        | egrep -v '^<[0-9]+,[0-9]+:highlight>$' \\
-        | egrep -v '^<[0-9]+,[0-9]+:widget>Citation Link$' \\
-        |  egrep -v '^<[0-9]+,[0-9]+:underline>$' >  \\
-        ~/Zotero-data/storage/leela-annotations-in-PDFs-of-refs.org")
-## It would be nice to remove those PDFs without any annotations. Some other time.
 
 
 if(runRubyExtract) {
