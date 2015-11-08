@@ -236,7 +236,7 @@ but it did not fully fit my needs; in particular, the folder/collection
 structure needs to be created before hand in Zotero, I think the PDF
 annotations by Mendeley do not get transferred, and I think you might not
 get the full `annote` and `keywords` fields. As you have seen, though, I
-use it for fixing the dates (see step 5 in [Using it](#Using-it)).
+use it for fixing the dates (see step 5 in [Using it](#using-it)).
 
 
 
@@ -375,7 +375,7 @@ that has stuff I do not need (the collection structure) and it is better
 to change the file paths. So I process Zotero's BibTeX with a little sed
 script that I run whenever Zotero produces a new BibTeX file. See all the
 details in
-[Automatically propagating changes in the database to helm and tablet](#Automatically-propagating-changes-in-the-database-to-helm-and-tablet).
+[Automatically propagating changes in the database to helm and tablet](#automatically-propagating-changes-in-the-database-to-helm-and-tablet).
 
 
 
@@ -473,7 +473,7 @@ For that to work, I generate, from the Zotero BibTeX file, a bib file with
 the file paths stripped of extraneous information, so that the file field
 contains only file paths. This is done with the script
 **sed-helm-tablets.sh**, and further details are provided in
-[Automatically propagating changes in the database to helm and tablet](#Automatically-propagating-changes-in-the-database-to-helm-and-tablet).
+[Automatically propagating changes in the database to helm and tablet](#automatically-propagating-changes-in-the-database-to-helm-and-tablet).
 
 
 **Beware** that because of the way BBT works, if you want to preserve the
@@ -507,7 +507,7 @@ simpler. So that I do not need to remember to launch it manually, in my
     ls ~/Zotero-data/storage/zotero-$HOSTNAME.bib | entr ~/Adios_Mendeley/sed-helm-tablets.sh &
 
 The reason why I have specific files per host is explained in the
-[Notes about using syncthing](#Notes-about-using-syncthing) section
+[Notes about using syncthing](#notes-about-using-syncthing) section
 
 
 
