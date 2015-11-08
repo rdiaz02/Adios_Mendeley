@@ -313,20 +313,26 @@ to read papers in a tablet (see my
 ## Using a tablet ##
 
 
-Here things are not as easy and nice as they were with
+Here things are not nearly as easy and nice as they were with
 [Referey](https://play.google.com/store/apps/details?id=com.kmk.Referey&hl=en)
 and Mendeley. I have tried all of the apps listed in
 (https://www.zotero.org/support/mobile), including Zandy, Zed Lite, Zed
-beta, Zojo, Zotero Reader, and Zotfile. The main problem is that with none
+beta, Zojo, Zotero Reader, Zotable, and Zotfile. The main problem is that with none
 of them you can do something that to me is necessary: get the database
 file from whererever the app deams suitable, but take the PDFs (more
 generally, attached files) from a place I sync on my own. I do not store
 my attached files in Zotero's servers and I do not use Dropbox, but sync
 them with
-[syncthing](https://syncthing.net/).  [Zotfile](http://zotfile.com/) is
+[syncthing](https://syncthing.net/). I do not want to set
+up a WebDAV server either, since it is just simpler to keep my 
+Zotero storage directory (where the PDFs live) synced between computers and tablets
+with syncthing.
+[Zotfile](http://zotfile.com/) is
 nice, but not really what I need and I find it too complicated and
 requires too much manual intervention ---see the comments in my
-[web page entry](http://ligarto.org/rdiaz/Zotero-Mendeley-Tablet.html#sec-6-2).
+[web page entry](http://ligarto.org/rdiaz/Zotero-Mendeley-Tablet.html#sec-6-2);
+for instance, I need to decide what to send back and forth; too much work,
+and requires making accurate predictions about what I'll want/need to read.
 
 
 So what I am doing now is using Android applications that understand
