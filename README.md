@@ -342,19 +342,20 @@ you have several levels of nesting. So you can see part of the
 structure of your Zotero collections. However, Erathostenes
 takes a very long time to load my BibTeX file. It is Erathostenes
 what I use most of the time, but I am not fully satisfied. (Erathostenes
-might support Zotero in the near future: see [this road map](https://bitbucket.org/mkmatlock/eratosthenes/wiki/Changelog#!planned-for-08-to-be-released-september-2014)).
+might support Zotero in the near future: see [the changelog for future versions](https://bitbucket.org/mkmatlock/eratosthenes/wiki/Changelog#!planned-for-08-to-be-released-september-2014)).
 
 
 RefMaster is nice (sorting by several fields) and in my experience faster
 than Erathostenes, but it does not support multiple files per entry (it is
 a "future feature", but this might take long to arrive, given that
-RefMaster's last version is from over two years ago).
+RefMaster's last version is from over two years ago). JabRef groups are not supported yet
+either.
 
 Library is much faster than the two above and supports multiple files and
 you can of course search the library. However, you cannot sort by date
 (this is a
-[requested feature](https://github.com/cgogolin/library/issues/1)) and there are
-no collections.
+[requested feature](https://github.com/cgogolin/library/issues/1)) and there
+is no support for JabRef's groups.
 
 
 Things, thus, are not as easy and simple as they were with Referey, and I
