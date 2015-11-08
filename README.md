@@ -115,7 +115,7 @@ These are the pieces of information I get from the Mendeley sqlite file
 file):
 
 - Date the file was added (field `timestamp`). But note this is not
-  directly incorporated into Zotero (see step 5 in [Using it](#Using-it)).
+  directly incorporated into Zotero (see step 5 in [Using it](#using-it)).
 
 - Annotations in the entry. You might think you have these in the BibTeX
   file, but maybe you don't: as of July 2015, with Mendeley's v. 1.14 the
