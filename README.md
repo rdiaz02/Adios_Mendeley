@@ -378,7 +378,7 @@ tablet. I use [syncthing](https://syncthing.net/) for syncing the PDFs and
 other attachments and for syncing the BibTeX file.
 
 But what BibTeX file? Not the one immediately exported by Zotero, since
-that has stuff I do not need (the collection structure) and it is better
+that has stuff I might not need (the collection structure if using Library or RefMaster) and it is better
 to change the file paths. So I process Zotero's BibTeX with a little sed
 script that I run whenever Zotero produces a new BibTeX file. See all the
 details in
@@ -500,7 +500,7 @@ updated (this is something you configure in Zotero, and I have it so that
 each machine running Zotero writes its own `zotero-$HOSTNAME.bib`
 file). But we want to modify this file, so it is easier to use in the
 tablets and with Emacs. We want BiBTeX files without the JabRef group
-structure and with easier to use file paths (easier to open from Emacs and
+structure for Library and RefMaster (we leave it if using Erathostenes) and with easier to use file paths (easier to open from Emacs and
 the tablets). This I do with the sed scripts **sed-helm-tablets.sh**.
 
 
