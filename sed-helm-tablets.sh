@@ -24,19 +24,33 @@ sed -e '/file = {/{
     s/ [^/:]*:/ /g
 }' $ZOTDIR/zotero-$HOSTNAME.bib > $ZOTDIR/helm.bib
 
-    sed -e '/file = {/{
+sed -e '/file = {/{
     s/\/home\/ramon\/Zotero-data\/storage//g 
 }' $ZOTDIR/zotero-$HOSTNAME.bib > $ZOTDIR/tablet-erathostenes.bib
 
-    ## In the tablet, Library uses the same file as Refmaster. Library can
-    ## deal with multiple attached files per entry. With RefMaster you can
-    ## only use one file. It uses relative paths
-    sed -e '/file = {/{
+## In the tablet, Library uses the same file as Refmaster. Library can
+## deal with multiple attached files per entry. With RefMaster you can
+## only use one file. It uses relative paths
+sed -e '/file = {/{
     s/\/home\/ramon\/Zotero-data\/storage//g 
 }' $ZOTDIR/zotero-$HOSTNAME.bib > $ZOTDIR/tablet-refmaster.bib
-    ## And remove jabref groups
-    sed -i -n '/@comment{jabref-meta: groupsversion:3;}/q;p' $ZOTDIR/tablet-refmaster.bib
+## And remove jabref groups
+sed -i -n '/@comment{jabref-meta: groupsversion:3;}/q;p' $ZOTDIR/tablet-refmaster.bib
 
+
+
+
+## make erathostene's file as small as possible? Doesn't help much and cna
+## crate problems in newlines. Not worth it
+# sed -i "/abstract = {/d"  $ZOTDIR/tablet-erathostenes.bib
+# sed -i "/keywords = {/d"  $ZOTDIR/tablet-erathostenes.bib
+# sed -i "/mendid = {/d"  $ZOTDIR/tablet-erathostenes.bib
+# sed -i "/timestamp = {/d"  $ZOTDIR/tablet-erathostenes.bib
+# sed -i "/url = {/d"  $ZOTDIR/tablet-erathostenes.bib
+# sed -i "/doi = {/d"  $ZOTDIR/tablet-erathostenes.bib
+# sed -i "/pmid = {/d"  $ZOTDIR/tablet-erathostenes.bib
+# sed -i "/annote = {/d"  $ZOTDIR/tablet-erathostenes.bib
+# sed -i "/mendpfnotes = {/d"  $ZOTDIR/tablet-erathostenes.bib
 
 
 # OUT=$1
