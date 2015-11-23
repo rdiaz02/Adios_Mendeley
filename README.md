@@ -485,10 +485,10 @@ so `C-x C-f` on top of the file path opens it). I am now using
 within Emacs, but it would work the same with Okular or another viewer.~~
 
 
-In fact, it is very simple to have helm-bibtex jump to the file field
+~~In fact, it is very simple to have helm-bibtex jump to the file field
 directly as the default action (and, once in there, if you have multiple
 files, moving between them is simple with `forward-sexp`). I have this in
-my `.emacs`:
+my `.emacs`:~~
 
     (defun rdu-helm-bibtex-go-to-file-field (KEY)
       "Jump to the file field in the entry."
@@ -539,10 +539,10 @@ and the file I use with helm-bibtex, all that remains to be done is run
 the script when the BibTeX file changes. We could do it with
 `inotifywatch` but using [entr](http://entrproject.org/) is much
 simpler. So that I do not need to remember to launch it manually, in my
-`.xsession` I have
+`.xsession` I have~~
 
     ls ~/Zotero-data/storage/zotero-$HOSTNAME.bib | entr ~/Adios_Mendeley/sed-helm-tablets.sh &
-~~
+
 The reason why I have specific files per host is explained in the
 [Notes about using syncthing](#notes-about-using-syncthing) section
 
