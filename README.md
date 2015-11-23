@@ -313,6 +313,15 @@ to read papers in a tablet (see my
 ## Using a tablet ##
 
 
+**This is left here for historical purposes, but it is OUTDATED!!!**
+I am now using
+[Referey](https://play.google.com/store/apps/details?id=com.kmk.Referey),
+after converting the Zotero db to a db that Referey will understand. The
+code is available from the repo
+[Zotero-to-Referey](https://github.com/rdiaz02/Zotero-to-Referey).
+
+
+
 Here things are not nearly as easy and nice as they were with
 [Referey](https://play.google.com/store/apps/details?id=com.kmk.Referey&hl=en)
 and Mendeley. I have tried all of the apps listed in
@@ -370,6 +379,14 @@ do miss that.
 
 
 ### How do I use Zotero and the tablet? ###
+
+**Again, this is left here for historical purposes, but it is OUTDATED!!!**
+I am now using
+[Referey](https://play.google.com/store/apps/details?id=com.kmk.Referey),
+after converting the Zotero db to a db that Referey will understand. The
+code is available from the repo
+[Zotero-to-Referey](https://github.com/rdiaz02/Zotero-to-Referey).
+
 
 First, I only use the tablet to read and annotate the PDFs. I am not that
 interested now in modifying the BibTeX file (or Zotero's db) itself. So
@@ -431,11 +448,22 @@ There is much room for improvement here, though:
   [helm-bibtex](https://github.com/tmalsburg/helm-bibtex) will understand
   (when the
   [version of helm-bibtex that uses a single notes file is ready](https://github.com/tmalsburg/helm-bibtex/issues/40). This
-  is in my to-do. 
+  is in my to-do.
 
 
 
 ### Using the BibTeX file from Emacs ###
+
+
+**Left here for historical purposes, but now OUTDATED**
+[helm-bibtex](https://github.com/tmalsburg/helm-bibtex) can, since mid
+November 2015, deal with the File field (see
+[this merge](https://github.com/tmalsburg/helm-bibtex/pull/73) and
+[this commit](https://github.com/tmalsburg/helm-bibtex/commit/f6f2864bed775908294a2b5956d4ab5e302a2485)).
+So I am still using helm-bibtex, of course, but I no longer need to do any
+of the things below.
+
+
 
 After seeing it mentioned in the org mode list, I've started using the
 really great [helm-bibtex](https://github.com/tmalsburg/helm-bibtex), a
@@ -494,6 +522,8 @@ contains only file paths. This is done with the script
   your needs.
 
 ### Automatically propagating changes in the database to helm and tablet ###
+
+**Outdated too: not needed any more. See above and [Zotero-to-Referey](https://github.com/rdiaz02/Zotero-to-Referey)**
 
 Whenever there is a change in the Zotero database, the BiBTeX file gets
 updated (this is something you configure in Zotero, and I have it so that
