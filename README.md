@@ -322,7 +322,7 @@ code is available from the repo
 
 
 
-Here things are not nearly as easy and nice as they were with
+~~Here things are not nearly as easy and nice as they were with
 [Referey](https://play.google.com/store/apps/details?id=com.kmk.Referey&hl=en)
 and Mendeley. I have tried all of the apps listed in
 (https://www.zotero.org/support/mobile), including Zandy, Zed Lite, Zed
@@ -341,10 +341,10 @@ nice, but not really what I need and I find it too complicated and
 requires too much manual intervention ---see the comments in my
 [web page entry](http://ligarto.org/rdiaz/Zotero-Mendeley-Tablet.html#sec-6-2);
 for instance, I need to decide what to send back and forth; too much work,
-and requires making accurate predictions about what I'll want/need to read.
+and requires making accurate predictions about what I'll want/need to read.~~
 
 
-So what I am doing now is using Android applications that understand
+~~So what I am doing now is using Android applications that understand
 BibTeX files. There are three:
 [RefMaster](https://play.google.com/store/apps/details?id=me.bares.refmaster),
 [Library](https://play.google.com/store/apps/details?id=com.cgogolin.library),
@@ -357,24 +357,24 @@ you have several levels of nesting. So you can see part of the
 structure of your Zotero collections. However, Erathostenes
 takes a very long time to load my BibTeX file. It is Erathostenes
 what I use most of the time, but I am not fully satisfied. (Erathostenes
-might support Zotero in the near future: see [the changelog for future versions](https://bitbucket.org/mkmatlock/eratosthenes/wiki/Changelog#!planned-for-08-to-be-released-september-2014)).
+might support Zotero in the near future: see [the changelog for future versions](https://bitbucket.org/mkmatlock/eratosthenes/wiki/Changelog#!planned-for-08-to-be-released-september-2014)).~~
 
 
-RefMaster is nice (sorting by several fields) and in my experience faster
+~~RefMaster is nice (sorting by several fields) and in my experience faster
 than Erathostenes, but it does not support multiple files per entry (it is
 a "future feature", but this might take long to arrive, given that
 RefMaster's last version is from over two years ago). JabRef groups are not supported yet
-either.
+either.~~
 
-Library is much faster than the two above and supports multiple files and
+~~Library is much faster than the two above and supports multiple files and
 you can of course search the library. However, you cannot sort by date
 (this is a
 [requested feature](https://github.com/cgogolin/library/issues/1)) and there
-is no support for JabRef's groups.
+is no support for JabRef's groups.~~
 
 
-Things, thus, are not as easy and simple as they were with Referey, and I
-do miss that. 
+~~Things, thus, are not as easy and simple as they were with Referey, and I
+do miss that.~~
 
 
 
