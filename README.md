@@ -349,9 +349,9 @@ BibTeX files. There are three:
 [RefMaster](https://play.google.com/store/apps/details?id=me.bares.refmaster),
 [Library](https://play.google.com/store/apps/details?id=com.cgogolin.library),
 and
-[Erathostenes](https://play.google.com/store/apps/details?id=com.mm.eratos).
+[Erathostenes](https://play.google.com/store/apps/details?id=com.mm.eratos).~~
 
-Erathostenes understands the nesting in JabRef's
+~~Erathostenes understands the nesting in JabRef's
 groups, though it will only display the lower-most level, if
 you have several levels of nesting. So you can see part of the
 structure of your Zotero collections. However, Erathostenes
@@ -388,18 +388,18 @@ code is available from the repo
 [Zotero-to-Referey](https://github.com/rdiaz02/Zotero-to-Referey).
 
 
-First, I only use the tablet to read and annotate the PDFs. I am not that
+~~First, I only use the tablet to read and annotate the PDFs. I am not that
 interested now in modifying the BibTeX file (or Zotero's db) itself. So
 this is just a matter of getting the BibTeX exported from Zotero into the
 tablet. I use [syncthing](https://syncthing.net/) for syncing the PDFs and
-other attachments and for syncing the BibTeX file.
+other attachments and for syncing the BibTeX file.~~
 
-But what BibTeX file? Not the one immediately exported by Zotero, since
+~~But what BibTeX file? Not the one immediately exported by Zotero, since
 that has stuff I might not need (the collection structure if using Library or RefMaster) and it is better
 to change the file paths. So I process Zotero's BibTeX with a little sed
 script that I run whenever Zotero produces a new BibTeX file. See all the
 details in
-[Automatically propagating changes in the database to helm and tablet](#automatically-propagating-changes-in-the-database-to-helm-and-tablet).
+[Automatically propagating changes in the database to helm and tablet](#automatically-propagating-changes-in-the-database-to-helm-and-tablet).~~
 
 
 
@@ -465,7 +465,7 @@ of the things below.
 
 
 
-After seeing it mentioned in the org mode list, I've started using the
+~~After seeing it mentioned in the org mode list, I've started using the
 really great [helm-bibtex](https://github.com/tmalsburg/helm-bibtex), a
 bibliography manager for Emacs. Searching for stuff and inserting
 references in something you are writing is amazingly simple and
@@ -473,16 +473,16 @@ powerful. However, I am not using `helm-bibtex-find-pdf` since I often
 have multiple PDFs associated with one entry. (I also have other issues,
 such as how the path is specified, but these could be fixed with the hints
 that Titus von der Malsburg gave me
-[here](https://github.com/tmalsburg/helm-bibtex/issues/53)).
+[here](https://github.com/tmalsburg/helm-bibtex/issues/53)).~~
 
 
-What I do, if I want access to the PDF, is open the entry I want from
+~~What I do, if I want access to the PDF, is open the entry I want from
 helm-bibtex and then go the the `file` field, and `C-x C-f` to open the
 file (I am using
 [ffap with ido](http://www.gnu.org/software/emacs/manual/html_node/ido/Find-File-At-Point.html),
 so `C-x C-f` on top of the file path opens it). I am now using
 [pdf-tools](https://github.com/politza/pdf-tools) to view the PDFs from
-within Emacs, but it would work the same with Okular or another viewer.
+within Emacs, but it would work the same with Okular or another viewer.~~
 
 
 In fact, it is very simple to have helm-bibtex jump to the file field
@@ -504,11 +504,11 @@ my `.emacs`:
 
 
 
-For that to work, I generate, from the Zotero BibTeX file, a bib file with
+~~For that to work, I generate, from the Zotero BibTeX file, a bib file with
 the file paths stripped of extraneous information, so that the file field
 contains only file paths. This is done with the script
 **sed-helm-tablets.sh**, and further details are provided in
-[Automatically propagating changes in the database to helm and tablet](#automatically-propagating-changes-in-the-database-to-helm-and-tablet).
+[Automatically propagating changes in the database to helm and tablet](#automatically-propagating-changes-in-the-database-to-helm-and-tablet).~~
 
 
 **Beware** that because of the way BBT works, if you want to preserve the
@@ -525,16 +525,16 @@ contains only file paths. This is done with the script
 
 **Outdated too: not needed any more. See above and [Zotero-to-Referey](https://github.com/rdiaz02/Zotero-to-Referey)**
 
-Whenever there is a change in the Zotero database, the BiBTeX file gets
+~~Whenever there is a change in the Zotero database, the BiBTeX file gets
 updated (this is something you configure in Zotero, and I have it so that
 each machine running Zotero writes its own `zotero-$HOSTNAME.bib`
 file). But we want to modify this file, so it is easier to use in the
 tablets and with Emacs. We want BiBTeX files without the JabRef group
 structure for Library and RefMaster (we leave it if using Erathostenes) and with easier to use file paths (easier to open from Emacs and
-the tablets). This I do with the sed scripts **sed-helm-tablets.sh**.
+the tablets). This I do with the sed scripts **sed-helm-tablets.sh**.~~
 
 
-Since we want to have these changes propagate automagically to the tablet
+~~Since we want to have these changes propagate automagically to the tablet
 and the file I use with helm-bibtex, all that remains to be done is run
 the script when the BibTeX file changes. We could do it with
 `inotifywatch` but using [entr](http://entrproject.org/) is much
@@ -542,7 +542,7 @@ simpler. So that I do not need to remember to launch it manually, in my
 `.xsession` I have
 
     ls ~/Zotero-data/storage/zotero-$HOSTNAME.bib | entr ~/Adios_Mendeley/sed-helm-tablets.sh &
-
+~~
 The reason why I have specific files per host is explained in the
 [Notes about using syncthing](#notes-about-using-syncthing) section
 
