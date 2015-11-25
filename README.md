@@ -421,10 +421,7 @@ I am using [Leela](https://github.com/TrilbyWhite/Leela) (see
 for details) and also
 [this ruby script by Dan Lucraft](https://gist.github.com/danlucraft/5277732)
 that uses [pdf reader](https://github.com/yob/pdf-reader). The ruby script
-will extract highlights too, whereas that is not working with Leela (or
-any other poppler-based approaches; that is my experience, but also at
-least the one of
-[Casey Kuhlman](http://coda.caseykuhlman.com/entries/2014/pdf-extract.html)).
+will extract highlights too, whereas that is not working with Leela.
 
 It seems that [pdf.js](https://mozilla.github.io/pdf.js/) is a very
 capable platform that extracts highlights and annotations, and that is in
@@ -440,15 +437,35 @@ manual triggering (and, file by file, is a lot slower than Leela). With
 the approach I use, extraction takes place automagically.
 
 
-There is much room for improvement here, though:
+Finally, it is also possible to do this directly from Emacs itself with
+pdf-tools, and include the notes in an org file:
+[Note Taking with PDF Tools](http://matt.hackinghistory.ca/2015/11/11/note-taking-with-pdf-tools/). It
+works great, and not only do we get both notes and the text of the
+highlight (i.e., what I was doing through the ruby script or Zotfile), but
+we also get a **link to the precise location of the
+annotation**[thanks to the added "++" syntax in org-pdfview](https://github.com/markus1189/org-pdfview/pull/7). However,
+I still have to figure out how to, automatically from a cron job, generate
+a single file with all annotations (or scan my library to generate one
+file of annotations per PDF).
+
+So there is much room for improvement here:
 
 - Trigger the extraction only for the PDF that is modified (and neatly
   insert the annotation in the proper place).
+- Populate the annotation file only for files with annotations (not with useless
+  links to PDFs that contain no annotations).
 - Create the annotation file in the best way for 
   [helm-bibtex](https://github.com/tmalsburg/helm-bibtex) to  understand
   (helm-bibtex supports keeping all notes in one file: see
   [this commit](https://github.com/tmalsburg/helm-bibtex/commit/5d028b983465e997cc59dd0237a171eab8fb56ba)
-  and this [news entry](https://github.com/tmalsburg/helm-bibtex/commit/fe78fd04630ae078443aed1fa82b13b2f512f3ef)).
+  and this
+  [news entry](https://github.com/tmalsburg/helm-bibtex/commit/fe78fd04630ae078443aed1fa82b13b2f512f3ef)).
+- Use the approach in
+  [Note Taking with PDF Tools](http://matt.hackinghistory.ca/2015/11/11/note-taking-with-pdf-tools/)
+  to generate that file for helm-bibtex.
+- Figure out whether I want a single file with all annotations or a file
+  per entry (preliminary tests suggest that a single huge file will lead
+  to deals in helm-bibtex).  
 
 
 
