@@ -443,7 +443,7 @@ pdf-tools, and include the notes in an org file:
 works great, and not only do we get both notes and the text of the
 highlight (i.e., what I was doing through the ruby script or Zotfile), but
 we also get a **link to the precise location of the
-annotation**[thanks to the added "++" syntax in org-pdfview](https://github.com/markus1189/org-pdfview/pull/7). However,
+annotation** [thanks to the added "++" syntax in org-pdfview](https://github.com/markus1189/org-pdfview/pull/7). However,
 I still have to figure out how to, automatically from a cron job, generate
 a single file with all annotations (or scan my library to generate one
 file of annotations per PDF).
@@ -465,7 +465,13 @@ So there is much room for improvement here:
   to generate that file for helm-bibtex.
 - Figure out whether I want a single file with all annotations or a file
   per entry (preliminary tests suggest that a single huge file will lead
-  to deals in helm-bibtex).  
+  to deals in helm-bibtex).
+- Add the notes from Zotero itself to the org file(s) with annotations, or
+  merge them into just one `annote` field. This way, I'd have a single
+  place to do all and every search
+  ([helm-bibtex can search on additional search fields](https://github.com/tmalsburg/helm-bibtex#fields-used-for-searching),
+  but
+  [if you have several per entry only the last one is used](https://github.com/tmalsburg/helm-bibtex/issues/56)).
 
 
 
