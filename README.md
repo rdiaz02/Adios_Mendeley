@@ -444,11 +444,11 @@ There is much room for improvement here, though:
 
 - Trigger the extraction only for the PDF that is modified (and neatly
   insert the annotation in the proper place).
-- Create the annotation file in a way that
-  [helm-bibtex](https://github.com/tmalsburg/helm-bibtex) will understand
-  (when the
-  [version of helm-bibtex that uses a single notes file is ready](https://github.com/tmalsburg/helm-bibtex/issues/40). This
-  is in my to-do.
+- Create the annotation file in the best way for 
+  [helm-bibtex](https://github.com/tmalsburg/helm-bibtex) to  understand
+  (helm-bibtex supports keeping all notes in one file: see
+  [this commit](https://github.com/tmalsburg/helm-bibtex/commit/5d028b983465e997cc59dd0237a171eab8fb56ba)
+  and this [news entry](https://github.com/tmalsburg/helm-bibtex/commit/fe78fd04630ae078443aed1fa82b13b2f512f3ef)).
 
 
 
