@@ -1,6 +1,12 @@
 ## An ugly kludge to place all PDF annotations (and highlight with the
 ## Ruby library) on an org-mode file.
 
+## It turns out both leela and the ruby library are missing MANY
+## annotations made in the tablet. So this is getting to be useless.
+
+## Seems now it is safer to extract annotations with Zotfile, and then, in
+## Zotero, do an advanced search for the term in "Note" (not Annotation)
+## Of course, that requires having extracted annotations from all.
 
 leelaPath <- "~/Sources/Leela-master/leela"
 pdfextractPath <- "~/Sources/extract.rb/5277732"
