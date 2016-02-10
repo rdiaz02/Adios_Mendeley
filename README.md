@@ -408,6 +408,15 @@ details in
 
 ### Extracting all PDF annotations and placing them in an org-mode file ###
 
+**Beware: the approach explained here is not working well**. I find that I am
+**missing many annotations or highlights** made in the tablet with at least
+one PDF reading application. The annotations are there, you can
+see them in Emacs with pdf-tools or in Okular or whatever, but neither leela
+nor the ruby script will extract them. Fortunately, **Zotfile can extract them**. If you
+do not want to miss annotations/highlight, use Zotfile from Zotero and extract
+annotations. Then, run and advanced search searching for your term in "Note" (not
+"Annotation"). Thus, what follows is likely useless. 
+
 A very simple way, for me, to be able to quickly search all annotations in
 PDFs (and even highlights) is to extract the annotations and highlights,
 and place them in an [org mode](http://orgmode.org/) file, where the
