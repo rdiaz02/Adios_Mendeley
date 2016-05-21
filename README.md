@@ -135,7 +135,9 @@ file):
   highlights in the PDF itself (this is easy to check if you open a
   Mendeley-annotated file in any other pdf viewer). So I grab the PDF
   annotations and place them in a new field in the BibTeX file that I call
-  `mendpfnotes`.
+  `mendpfnotes`. You might, alternatively, want to use [Menextract2pdf](https://github.com/cycomanic/Menextract2pdf) 
+  that "extracts highlights and notes from the Mendeley database and adds them directly to all 
+  relevant PDF files, which can then be read by most PDF readers".
 
 - Keywords and tags. In Mendeley's dbs and BibTeX you get a `keywords` and
   a `mendeley-tags` field. I think `keywords` often contain the author's
@@ -236,7 +238,10 @@ but it did not fully fit my needs; in particular, the folder/collection
 structure needs to be created before hand in Zotero, I think the PDF
 annotations by Mendeley do not get transferred, and I think you might not
 get the full `annote` and `keywords` fields. As you have seen, though, I
-use it for fixing the dates (see step 5 in [Using it](#using-it)).
+use it for fixing the dates (see step 5 in [Using it](#using-it)). 
+[Menextract2pdf](https://github.com/cycomanic/Menextract2pdf) "extracts highlights 
+and notes from the Mendeley database and adds them directly to all 
+relevant PDF files, which can then be read by most PDF readers".
 
 
 
