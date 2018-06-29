@@ -15,7 +15,13 @@ highlights from PDFs (annotations and highlights in the PDF itself), as
 well as prepare the BibTeX file for easy usage with Emacs and with a
 tablet.
 
+## Update (2018-06-29): READ THIS FIRST ##
 
+Zotero has now a way to import directly from Mendeley. You most likely want to try that first (and second, and third, ... before playing around with these scripts, messing around with R, etc). These are two links:
+https://www.zotero.org/support/kb/mendeley_import 
+https://forums.zotero.org/discussion/72260/available-for-beta-testing-mendeley-import
+
+(and, for the sake of historical records, you can look at https://github.com/rdiaz02/Adios_Mendeley/issues/4 where bwiernik alerted me to the issue, and the conversation that followed).
 
 ## Using it ##
 
