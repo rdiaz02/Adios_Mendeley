@@ -21,7 +21,7 @@ Zotero has now a way to import directly from Mendeley. You most likely want to t
 https://www.zotero.org/support/kb/mendeley_import 
 https://forums.zotero.org/discussion/72260/available-for-beta-testing-mendeley-import
 
-(and, for the sake of historical records, you can look at https://github.com/rdiaz02/Adios_Mendeley/issues/4 where bwiernik alerted me to the issue, and the conversation that followed).
+(and, for the sake of historical records, you can look at https://github.com/rdiaz02/Adios_Mendeley/issues/4 where Brenton Wiernik alerted me to the issue, and the conversation that followed).
 
 ## Using it ##
 
