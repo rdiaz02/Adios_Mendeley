@@ -76,11 +76,11 @@ BibTeX and go back to step 3.
 timestamp field would be recognized does not work. But you can use Alex
 Seeholzer's [mendeley2zotero](https://github.com/flinz/mendeley2zotero).
 	1. Make a backup copy of your databases.
-	2. Modify the script to have line `d_added =
+	2. ~Modify the script to have line `d_added =
 	datetime.datetime.utcfromtimestamp(d_added)` be `d_added =
 	datetime.datetime.utcfromtimestamp(d_added/1000)` (at least as of July
-	2015 Mendeley is using time in miliseconds since 1970).  (This might have been fixed by
-	the time you read this, since I filed an [issue](https://github.com/flinz/mendeley2zotero/issues/2)).
+	2015 Mendeley is using time in miliseconds since 1970).~  (This was fixed by
+	in the [issue](https://github.com/flinz/mendeley2zotero/issues/2)) I filed.~
 	3. Run the script with the `added_dates` option. You might get some warnings that, as far as I can
 	tell, are inoquous.
 	4. Copy the zot.sqlite as the new zotero.sqlite, start Zotero, and
