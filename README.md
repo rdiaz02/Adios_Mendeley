@@ -15,6 +15,13 @@ highlights from PDFs (annotations and highlights in the PDF itself), as
 well as prepare the BibTeX file for easy usage with Emacs and with a
 tablet.
 
+## Update (post mid-2018): READ THIS FIRST ##
+
+Importing from Mendeley has become more complicated, after Mendeley started encrypting the local database (*your* database). See details and follow the steps given here:
+https://www.zotero.org/support/kB/mendeley_import#mendeley_database_encryption
+https://www.zotero.org/support/kB/mendeley_import
+https://forums.zotero.org/discussion/80051/has-anybody-decrypted-mendeleys-library
+
 ## Update (2018-06-29): READ THIS FIRST ##
 
 Zotero has now a way to import directly from Mendeley. You most likely want to try that first (and second, and third, ... before playing around with these scripts, messing around with R, etc). These are two links:
